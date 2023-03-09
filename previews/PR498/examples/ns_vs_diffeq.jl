@@ -26,10 +26,10 @@ gmsh.model.model.add_physical_group(dim-1,[1],10,"bottom")
 gmsh.model.model.add_physical_group(dim,[1],11,"domain");
 
 gmsh.option.setNumber("Mesh.Algorithm",11)
-gmsh.option.setNumber("Mesh.MeshSizeFromCurvature",200)
-gmsh.option.setNumber("Mesh.MeshSizeMax",0.005)
-gmsh.option.setNumber("Mesh.MeshSizeFromCurvature",4)   #hide
-gmsh.option.setNumber("Mesh.MeshSizeMax",0.1)           #hide
+gmsh.option.setNumber("Mesh.MeshSizeFromCurvature",20)
+gmsh.option.setNumber("Mesh.MeshSizeMax",0.05)
+gmsh.option.setNumber("Mesh.MeshSizeFromCurvature",20)                                               #hide
+gmsh.option.setNumber("Mesh.MeshSizeMax",0.1)                                                        #hide
 
 gmsh.model.mesh.generate(dim)
 grid = togrid()
@@ -60,9 +60,8 @@ add!(ch, noslip_bc);
 
 ∂Ω_inflow = getfaceset(grid, "left");
 
-vᵢₙ(t) = clamp(t, 0.0, 1.0)*1.0 #inflow velocity
-vᵢₙ(t) = clamp(t, 0.0, 1.0)*0.3 #hide
-parabolic_inflow_profile((x,y),t) = [4*vᵢₙ(t)*y*(0.41-y)/0.41^2,0]
+vᵢₙ(t) = 1.5/(1+exp(-2.0*(t-2.0)))  #inflow velocity
+parabolic_inflow_profile((x,y),t) = [4*vᵢₙ(t)*y*(0.41-y)/0.41^2, 0.0]
 inflow_bc = Dirichlet(:v, ∂Ω_inflow, parabolic_inflow_profile, [1,2])
 add!(ch, inflow_bc);
 
@@ -88,6 +87,7 @@ function assemble_mass_matrix(cellvalues_v::CellVectorValues{dim}, cellvalues_p:
         for q_point in 1:getnquadpoints(cellvalues_v)
             dΩ = getdetJdV(cellvalues_v, q_point)
             # Remember that we assemble a vector mass term, hence the dot product.
+            # There is only one time derivative on the left hand side, so only one mass block is non-zero.
             for i in 1:n_basefuncs_v
                 φᵢ = shape_value(cellvalues_v, q_point, i)
                 for j in 1:n_basefuncs_v
@@ -148,7 +148,7 @@ end;
 
 T = 10.0
 Δt₀ = 0.01
-Δt_save = 0.1
+Δt_save = 0.025
 
 M = create_sparsity_pattern(dh);
 M = assemble_mass_matrix(cellvalues_v, cellvalues_p, M, dh);
@@ -205,12 +205,22 @@ end;
 rhs = ODEFunction(navierstokes!, mass_matrix=M; jac_prototype=jac_sparsity)
 problem = ODEProblem(rhs, u₀, (0.0,T), p);
 
+struct FreeDofErrorNorm
+    ch::ConstraintHandler
+end
+(fe_norm::FreeDofErrorNorm)(u::Union{AbstractFloat, Complex}, t) = DiffEqBase.ODE_DEFAULT_NORM(u, t)
+(fe_norm::FreeDofErrorNorm)(u::AbstractArray, t) = DiffEqBase.ODE_DEFAULT_NORM(u[fe_norm.ch.free_dofs], t)
+
 timestepper = ImplicitEuler(linsolve = UMFPACKFactorization(reuse_symbolic=false))
+
+
 integrator = init(
     problem, timestepper, initializealg=NoInit(), dt=Δt₀,
-    adaptive=true, abstol=1e-3, reltol=1e-3,
+    adaptive=true, abstol=1e-5, reltol=1e-4,
     progress=true, progress_steps=1,
-    saveat=Δt_save);
+    saveat=Δt_save, verbose=true,
+    internalnorm=FreeDofErrorNorm(ch)
+);
 
 pvd = paraview_collection("vortex-street.pvd");
 integrator = TimeChoiceIterator(integrator, 0.0:Δt_save:T)
