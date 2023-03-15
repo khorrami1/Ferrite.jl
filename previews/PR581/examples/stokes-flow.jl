@@ -108,8 +108,9 @@ function setup_mean_constraint(dh, fvp)
     C = end_assemble(assembler)
     # Create an AffineConstraint from the C-matrix
     _, J, V = findnz(C)
-    _, constrained_dof = findmax(abs2, V)
-    V ./= V[constrained_dof]
+    _, constrained_dof_idx = findmax(abs2, V)
+    constrained_dof = J[constrained_dof_idx]
+    V ./= V[constrained_dof_idx]
     mean_value_constraint = AffineConstraint(
         constrained_dof,
         Pair{Int,Float64}[J[i] => -V[i] for i in 1:length(J) if J[i] != constrained_dof],
@@ -218,6 +219,8 @@ function main()
     vtk_grid("stokes-flow", grid) do vtk
         vtk_point_data(vtk, dh, u)
     end
+
+
     return
 end
 
