@@ -133,7 +133,7 @@ function solve()
     end
 
     dbcs = ConstraintHandler(dh)
-    # Add a homogenous boundary condition on the "clamped" edge
+    # Add a homogeneous boundary condition on the "clamped" edge
     dbc = Dirichlet(:u, getfaceset(grid, "right"), (x,t) -> [0.0, 0.0, 0.0], [1, 2, 3])
     add!(dbcs, dbc)
     dbc = Dirichlet(:u, getfaceset(grid, "left"), (x,t) -> rotation(x, t), [1, 2, 3])
