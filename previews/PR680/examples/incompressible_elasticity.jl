@@ -1,6 +1,6 @@
 using Ferrite
 using BlockArrays, SparseArrays, LinearAlgebra
-import Ferrite: MultiCellValues
+import Ferrite
 
 function create_cook_grid(nx, ny)
     corners = [Vec{2}((0.0,   0.0)),
