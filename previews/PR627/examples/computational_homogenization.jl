@@ -1,8 +1,8 @@
 using Ferrite, SparseArrays, LinearAlgebra
 
 using FerriteGmsh
-# grid = saved_file_to_grid("periodic-rve-coarse.msh")
-grid = saved_file_to_grid("periodic-rve.msh")
+# grid = togrid("periodic-rve-coarse.msh")
+grid = togrid("periodic-rve.msh")
 
 dim = 2
 ip = Lagrange{dim, RefTetrahedron, 1}()
