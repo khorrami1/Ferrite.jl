@@ -50,12 +50,11 @@ grid.cells = grid.cells[cell_indices]
 for facesetname in keys(grid.facesets)
     grid.facesets[facesetname] = Set(map(fi -&gt; FaceIndex( cell_indices_map[fi.idx[1]] ,fi.idx[2]), collect(grid.facesets[facesetname])))
 end;</code></pre><h3 id="Function-Space"><a class="docs-heading-anchor" href="#Function-Space">Function Space</a><a id="Function-Space-1"></a><a class="docs-heading-anchor-permalink" href="#Function-Space" title="Permalink"></a></h3><p>To ensure stability we utilize the Taylor-Hood element pair Q2-Q1. We have to utilize the same quadrature rule for the pressure as for the velocity, because in the weak form the linear pressure term is tested against a quadratic function.</p><pre><code class="language-julia hljs">ip_v = Lagrange{dim, RefCube, 2}()
-ip_geom = Lagrange{dim, RefCube, 1}()
 qr = QuadratureRule{dim, RefCube}(4)
-cellvalues_v = CellVectorValues(qr, ip_v, ip_geom);
+cellvalues_v = CellVectorValues(qr, ip_v);
 
 ip_p = Lagrange{dim, RefCube, 1}()
-cellvalues_p = CellScalarValues(qr, ip_p, ip_geom);
+cellvalues_p = CellScalarValues(qr, ip_p);
 
 dh = DofHandler(grid)
 add!(dh, :v, dim, ip_v)
@@ -231,12 +230,11 @@ end;
 
 
 ip_v = Lagrange{dim, RefCube, 2}()
-ip_geom = Lagrange{dim, RefCube, 1}()
 qr = QuadratureRule{dim, RefCube}(4)
-cellvalues_v = CellVectorValues(qr, ip_v, ip_geom);
+cellvalues_v = CellVectorValues(qr, ip_v);
 
 ip_p = Lagrange{dim, RefCube, 1}()
-cellvalues_p = CellScalarValues(qr, ip_p, ip_geom);
+cellvalues_p = CellScalarValues(qr, ip_p);
 
 dh = DofHandler(grid)
 add!(dh, :v, dim, ip_v)
@@ -416,4 +414,4 @@ for (u_uc,t) in integrator
         pvd[t] = vtk
     end
 end
-vtk_save(pvd);</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../quasi_incompressible_hyperelasticity/">« Nearly Incompressible Hyperelasticity</a><a class="docs-footer-nextpage" href="../computational_homogenization/">Computational homogenization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Friday 5 May 2023 19:05">Friday 5 May 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+vtk_save(pvd);</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../quasi_incompressible_hyperelasticity/">« Nearly Incompressible Hyperelasticity</a><a class="docs-footer-nextpage" href="../computational_homogenization/">Computational homogenization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Monday 8 May 2023 19:30">Monday 8 May 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
