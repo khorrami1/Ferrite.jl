@@ -15,15 +15,12 @@ end;</code></pre><p>Next we define a function to set up our cell- and facevalues
     qr      = QuadratureRule{2,RefTetrahedron}(3)
     face_qr = QuadratureRule{1,RefTetrahedron}(3)
 
-    # geometric interpolation
-    interpolation_geom = Lagrange{2,RefTetrahedron,1}()
-
     # cell and facevalues for u
-    cellvalues_u = CellVectorValues(qr, interpolation_u, interpolation_geom)
-    facevalues_u = FaceVectorValues(face_qr, interpolation_u, interpolation_geom)
+    cellvalues_u = CellVectorValues(qr, interpolation_u)
+    facevalues_u = FaceVectorValues(face_qr, interpolation_u)
 
     # cellvalues for p
-    cellvalues_p = CellScalarValues(qr, interpolation_p, interpolation_geom)
+    cellvalues_p = CellScalarValues(qr, interpolation_p)
 
     return cellvalues_u, cellvalues_p, facevalues_u
 end;</code></pre><p>We create a DofHandler, with two fields, <code>:u</code> and <code>:p</code>, with possibly different interpolations</p><pre><code class="language-julia hljs">function create_dofhandler(grid, ipu, ipp)
@@ -181,15 +178,12 @@ function create_values(interpolation_u, interpolation_p)
     qr      = QuadratureRule{2,RefTetrahedron}(3)
     face_qr = QuadratureRule{1,RefTetrahedron}(3)
 
-    # geometric interpolation
-    interpolation_geom = Lagrange{2,RefTetrahedron,1}()
-
     # cell and facevalues for u
-    cellvalues_u = CellVectorValues(qr, interpolation_u, interpolation_geom)
-    facevalues_u = FaceVectorValues(face_qr, interpolation_u, interpolation_geom)
+    cellvalues_u = CellVectorValues(qr, interpolation_u)
+    facevalues_u = FaceVectorValues(face_qr, interpolation_u)
 
     # cellvalues for p
-    cellvalues_p = CellScalarValues(qr, interpolation_p, interpolation_geom)
+    cellvalues_p = CellScalarValues(qr, interpolation_p)
 
     return cellvalues_u, cellvalues_p, facevalues_u
 end;
@@ -341,4 +335,4 @@ linear    = Lagrange{2,RefTetrahedron,1}()
 quadratic = Lagrange{2,RefTetrahedron,2}()
 
 u1 = solve(0.4999999, linear, linear)
-u2 = solve(0.4999999, quadratic, linear);</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../helmholtz/">« Helmholtz equation</a><a class="docs-footer-nextpage" href="../hyperelasticity/">Hyperelasticity »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Monday 8 May 2023 12:48">Monday 8 May 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+u2 = solve(0.4999999, quadratic, linear);</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../helmholtz/">« Helmholtz equation</a><a class="docs-footer-nextpage" href="../hyperelasticity/">Hyperelasticity »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Monday 8 May 2023 15:05">Monday 8 May 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
