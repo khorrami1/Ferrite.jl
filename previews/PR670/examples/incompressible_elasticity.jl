@@ -18,23 +18,20 @@ function create_values(interpolation_u, interpolation_p)
     qr      = QuadratureRule{2,RefTetrahedron}(3)
     face_qr = QuadratureRule{1,RefTetrahedron}(3)
 
-    # geometric interpolation
-    interpolation_geom = Lagrange{2,RefTetrahedron,1}()
-
     # cell and facevalues for u
-    cellvalues_u = CellVectorValues(qr, interpolation_u, interpolation_geom)
-    facevalues_u = FaceVectorValues(face_qr, interpolation_u, interpolation_geom)
+    cellvalues_u = CellVectorValues(qr, interpolation_u)
+    facevalues_u = FaceVectorValues(face_qr, interpolation_u)
 
     # cellvalues for p
-    cellvalues_p = CellScalarValues(qr, interpolation_p, interpolation_geom)
+    cellvalues_p = CellScalarValues(qr, interpolation_p)
 
     return cellvalues_u, cellvalues_p, facevalues_u
 end;
 
 function create_dofhandler(grid, ipu, ipp)
     dh = DofHandler(grid)
-    add!(dh, :u, 2, ipu) # displacement
-    add!(dh, :p, 1, ipp) # pressure
+    add!(dh, :u, ipu) # displacement
+    add!(dh, :p, ipp) # pressure
     close!(dh)
     return dh
 end;
@@ -174,11 +171,12 @@ function solve(ν, interpolation_u, interpolation_p)
     return u
 end
 
-linear    = Lagrange{2,RefTetrahedron,1}()
-quadratic = Lagrange{2,RefTetrahedron,2}()
+linear_p    = Lagrange{2,RefTetrahedron,1}()
+linear_u    = Lagrange{2,RefTetrahedron,1}()^2
+quadratic_u = Lagrange{2,RefTetrahedron,2}()^2
 
-u1 = solve(0.4999999, linear, linear)
-u2 = solve(0.4999999, quadratic, linear);
+u1 = solve(0.4999999, linear_u,    linear_p)
+u2 = solve(0.4999999, quadratic_u, linear_p);
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 

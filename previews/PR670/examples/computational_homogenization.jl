@@ -5,12 +5,12 @@ using FerriteGmsh
 grid = togrid("periodic-rve.msh")
 
 dim = 2
-ip = Lagrange{dim, RefTetrahedron, 1}()
+ip = Lagrange{dim, RefTetrahedron, 1}()^dim
 qr = QuadratureRule{dim, RefTetrahedron}(2)
 cellvalues = CellVectorValues(qr, ip);
 
 dh = DofHandler(grid)
-add!(dh, :u, 2)
+add!(dh, :u, ip)
 close!(dh);
 
 ch_dirichlet = ConstraintHandler(dh)
