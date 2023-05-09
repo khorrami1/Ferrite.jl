@@ -15,15 +15,12 @@ end;</code></pre><p>The function to create corresponding cellvalues for the disp
     qr      = QuadratureRule{3,RefTetrahedron}(4)
     face_qr = QuadratureRule{2,RefTetrahedron}(4)
 
-    # geometric interpolation
-    interpolation_geom = Lagrange{3,RefTetrahedron,1}()
-
     # cell and facevalues for u
-    cellvalues_u = CellVectorValues(qr, interpolation_u, interpolation_geom)
-    facevalues_u = FaceVectorValues(face_qr, interpolation_u, interpolation_geom)
+    cellvalues_u = CellVectorValues(qr, interpolation_u)
+    facevalues_u = FaceVectorValues(face_qr, interpolation_u)
 
     # cellvalues for p
-    cellvalues_p = CellScalarValues(qr, interpolation_p, interpolation_geom)
+    cellvalues_p = CellScalarValues(qr, interpolation_p)
 
     return cellvalues_u, cellvalues_p, facevalues_u
 end;</code></pre><p>We now create the function for Ψ*</p><pre><code class="language-julia hljs">function Ψ(F, p, mp::NeoHooke)
@@ -41,8 +38,8 @@ end;</code></pre><p>and it&#39;s derivatives (required in computing the jacobian
     return ∂Ψ∂F, ∂²Ψ∂F², ∂Ψ∂p, ∂²Ψ∂p², ∂²Ψ∂F∂p
 end;</code></pre><p>The functions to create the <code>DofHandler</code> and <code>ConstraintHandler</code> (to assign corresponding boundary conditions) follow likewise from the incompressible elasticity example, namely</p><pre><code class="language-julia hljs">function create_dofhandler(grid, ipu, ipp)
     dh = DofHandler(grid)
-    add!(dh, :u, 3, ipu) # displacement dim = 3
-    add!(dh, :p, 1, ipp) # pressure dim = 1
+    add!(dh, :u, ipu) # displacement dim = 3
+    add!(dh, :p, ipp) # pressure dim = 1
     close!(dh)
     return dh
 end;</code></pre><p>We are simulating a uniaxial tensile loading of a unit cube. Hence we apply a displacement field (<code>:u</code>) in <code>x</code> direction on the right face. The left, bottom and back faces are fixed in the <code>x</code>, <code>y</code> and <code>z</code> components of the displacement so as to emulate the uniaxial nature of the loading.</p><pre><code class="language-julia hljs">function create_bc(dh)
@@ -226,9 +223,9 @@ end;</code></pre><p>We now define a main function <code>solve</code>. For nonlin
     vol_def = calculate_volume_deformed_mesh(w, dh, cellvalues_u);
     print(&quot;Deformed volume is $vol_def&quot;)
     return vol_def;
-end;</code></pre><p>We can now test the solution using the Taylor-Hood approximation</p><pre><code class="language-julia hljs">quadratic = Lagrange{3, RefTetrahedron, 2}()
-linear = Lagrange{3, RefTetrahedron, 1}()
-vol_def = solve(quadratic, linear)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1.0001999771699892</code></pre><p>The deformed volume is indeed close to 1 (as should be for a nearly incompressible material).</p><h2 id="Plain-program"><a class="docs-heading-anchor" href="#Plain-program">Plain program</a><a id="Plain-program-1"></a><a class="docs-heading-anchor-permalink" href="#Plain-program" title="Permalink"></a></h2><p>Here follows a version of the program without any comments. The file is also available here: <a href="../quasi_incompressible_hyperelasticity.jl"><code>quasi_incompressible_hyperelasticity.jl</code></a>.</p><pre><code class="language-julia hljs">using Ferrite, Tensors, ProgressMeter
+end;</code></pre><p>We can now test the solution using the Taylor-Hood approximation</p><pre><code class="language-julia hljs">quadratic_u = Lagrange{3, RefTetrahedron, 2}()^3
+linear_p = Lagrange{3, RefTetrahedron, 1}()
+vol_def = solve(quadratic_u, linear_p)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1.0001999771699892</code></pre><p>The deformed volume is indeed close to 1 (as should be for a nearly incompressible material).</p><h2 id="Plain-program"><a class="docs-heading-anchor" href="#Plain-program">Plain program</a><a id="Plain-program-1"></a><a class="docs-heading-anchor-permalink" href="#Plain-program" title="Permalink"></a></h2><p>Here follows a version of the program without any comments. The file is also available here: <a href="../quasi_incompressible_hyperelasticity.jl"><code>quasi_incompressible_hyperelasticity.jl</code></a>.</p><pre><code class="language-julia hljs">using Ferrite, Tensors, ProgressMeter
 using BlockArrays, SparseArrays, LinearAlgebra
 
 struct NeoHooke
@@ -250,15 +247,12 @@ function create_values(interpolation_u, interpolation_p)
     qr      = QuadratureRule{3,RefTetrahedron}(4)
     face_qr = QuadratureRule{2,RefTetrahedron}(4)
 
-    # geometric interpolation
-    interpolation_geom = Lagrange{3,RefTetrahedron,1}()
-
     # cell and facevalues for u
-    cellvalues_u = CellVectorValues(qr, interpolation_u, interpolation_geom)
-    facevalues_u = FaceVectorValues(face_qr, interpolation_u, interpolation_geom)
+    cellvalues_u = CellVectorValues(qr, interpolation_u)
+    facevalues_u = FaceVectorValues(face_qr, interpolation_u)
 
     # cellvalues for p
-    cellvalues_p = CellScalarValues(qr, interpolation_p, interpolation_geom)
+    cellvalues_p = CellScalarValues(qr, interpolation_p)
 
     return cellvalues_u, cellvalues_p, facevalues_u
 end;
@@ -282,8 +276,8 @@ end;
 
 function create_dofhandler(grid, ipu, ipp)
     dh = DofHandler(grid)
-    add!(dh, :u, 3, ipu) # displacement dim = 3
-    add!(dh, :p, 1, ipp) # pressure dim = 1
+    add!(dh, :u, ipu) # displacement dim = 3
+    add!(dh, :p, ipp) # pressure dim = 1
     close!(dh)
     return dh
 end;
@@ -481,6 +475,6 @@ function solve(interpolation_u, interpolation_p)
     return vol_def;
 end;
 
-quadratic = Lagrange{3, RefTetrahedron, 2}()
-linear = Lagrange{3, RefTetrahedron, 1}()
-vol_def = solve(quadratic, linear)</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../linear_shell/">« Linear shell</a><a class="docs-footer-nextpage" href="../ns_vs_diffeq/">Incompressible Navier-Stokes Equations via DifferentialEquations.jl »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Monday 8 May 2023 10:09">Monday 8 May 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+quadratic_u = Lagrange{3, RefTetrahedron, 2}()^3
+linear_p = Lagrange{3, RefTetrahedron, 1}()
+vol_def = solve(quadratic_u, linear_p)</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../linear_shell/">« Linear shell</a><a class="docs-footer-nextpage" href="../ns_vs_diffeq/">Incompressible Navier-Stokes Equations via DifferentialEquations.jl »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Tuesday 9 May 2023 08:25">Tuesday 9 May 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
