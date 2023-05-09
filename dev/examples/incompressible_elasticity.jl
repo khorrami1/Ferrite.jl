@@ -30,8 +30,8 @@ end;
 
 function create_dofhandler(grid, ipu, ipp)
     dh = DofHandler(grid)
-    add!(dh, :u, 2, ipu) # displacement
-    add!(dh, :p, 1, ipp) # pressure
+    add!(dh, :u, ipu) # displacement
+    add!(dh, :p, ipp) # pressure
     close!(dh)
     return dh
 end;
@@ -171,11 +171,12 @@ function solve(ν, interpolation_u, interpolation_p)
     return u
 end
 
-linear    = Lagrange{2,RefTetrahedron,1}()
-quadratic = Lagrange{2,RefTetrahedron,2}()
+linear_p    = Lagrange{2,RefTetrahedron,1}()
+linear_u    = Lagrange{2,RefTetrahedron,1}()^2
+quadratic_u = Lagrange{2,RefTetrahedron,2}()^2
 
-u1 = solve(0.4999999, linear, linear)
-u2 = solve(0.4999999, quadratic, linear);
+u1 = solve(0.4999999, linear_u,    linear_p)
+u2 = solve(0.4999999, quadratic_u, linear_p);
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 
