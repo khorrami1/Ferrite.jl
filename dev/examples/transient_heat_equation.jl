@@ -8,7 +8,7 @@ qr = QuadratureRule{dim, RefCube}(2)
 cellvalues = CellScalarValues(qr, ip);
 
 dh = DofHandler(grid)
-add!(dh, :u, 1)
+add!(dh, :u, ip)
 close!(dh);
 
 K = create_sparsity_pattern(dh);

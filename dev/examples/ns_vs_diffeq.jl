@@ -30,7 +30,7 @@ end;
 
 grid = generate_grid(Quadrilateral, (x_cells, y_cells), Vec{2}((0.0, 0.0)), Vec{2}((0.55, 0.41)));   #hide
 
-ip_v = Lagrange{dim, RefCube, 2}()
+ip_v = Lagrange{dim, RefCube, 2}()^dim
 qr = QuadratureRule{dim, RefCube}(4)
 cellvalues_v = CellVectorValues(qr, ip_v);
 
@@ -38,8 +38,8 @@ ip_p = Lagrange{dim, RefCube, 1}()
 cellvalues_p = CellScalarValues(qr, ip_p);
 
 dh = DofHandler(grid)
-add!(dh, :v, dim, ip_v)
-add!(dh, :p, 1, ip_p)
+add!(dh, :v, ip_v)
+add!(dh, :p, ip_p)
 close!(dh);
 
 ch = ConstraintHandler(dh);

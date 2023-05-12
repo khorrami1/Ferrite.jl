@@ -13,8 +13,8 @@ qr_ooplane = QuadratureRule{1,RefCube}(2)
 cv = CellScalarValues(qr_inplane, ip)
 
 dh = DofHandler(grid)
-add!(dh, :u, 3, ip)
-add!(dh, :θ, 2, ip)
+add!(dh, :u, ip^3)
+add!(dh, :θ, ip^2)
 close!(dh)
 
 addedgeset!(grid, "left",  (x) -> x[1] ≈ 0.0)

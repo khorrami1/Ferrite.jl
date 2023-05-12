@@ -49,7 +49,7 @@ cell_indices_map = map(ci-&gt;norm(mean(map(i-&gt;grid.nodes[i].x-[0.2,0.2], Fer
 grid.cells = grid.cells[cell_indices]
 for facesetname in keys(grid.facesets)
     grid.facesets[facesetname] = Set(map(fi -&gt; FaceIndex( cell_indices_map[fi.idx[1]] ,fi.idx[2]), collect(grid.facesets[facesetname])))
-end;</code></pre><h3 id="Function-Space"><a class="docs-heading-anchor" href="#Function-Space">Function Space</a><a id="Function-Space-1"></a><a class="docs-heading-anchor-permalink" href="#Function-Space" title="Permalink"></a></h3><p>To ensure stability we utilize the Taylor-Hood element pair Q2-Q1. We have to utilize the same quadrature rule for the pressure as for the velocity, because in the weak form the linear pressure term is tested against a quadratic function.</p><pre><code class="language-julia hljs">ip_v = Lagrange{dim, RefCube, 2}()
+end;</code></pre><h3 id="Function-Space"><a class="docs-heading-anchor" href="#Function-Space">Function Space</a><a id="Function-Space-1"></a><a class="docs-heading-anchor-permalink" href="#Function-Space" title="Permalink"></a></h3><p>To ensure stability we utilize the Taylor-Hood element pair Q2-Q1. We have to utilize the same quadrature rule for the pressure as for the velocity, because in the weak form the linear pressure term is tested against a quadratic function.</p><pre><code class="language-julia hljs">ip_v = Lagrange{dim, RefCube, 2}()^dim
 qr = QuadratureRule{dim, RefCube}(4)
 cellvalues_v = CellVectorValues(qr, ip_v);
 
@@ -57,8 +57,8 @@ ip_p = Lagrange{dim, RefCube, 1}()
 cellvalues_p = CellScalarValues(qr, ip_p);
 
 dh = DofHandler(grid)
-add!(dh, :v, dim, ip_v)
-add!(dh, :p, 1, ip_p)
+add!(dh, :v, ip_v)
+add!(dh, :p, ip_p)
 close!(dh);</code></pre><h3 id="Boundary-Conditions"><a class="docs-heading-anchor" href="#Boundary-Conditions">Boundary Conditions</a><a id="Boundary-Conditions-1"></a><a class="docs-heading-anchor-permalink" href="#Boundary-Conditions" title="Permalink"></a></h3><p>As in the DFG benchmark we apply no-slip conditions to the top, bottom and cylinder boundary. The no-slip condition states that the velocity of the fluid on this portion of the boundary is fixed to be zero.</p><pre><code class="language-julia hljs">ch = ConstraintHandler(dh);
 
 nosplip_face_names = [&quot;top&quot;, &quot;bottom&quot;, &quot;hole&quot;];
@@ -229,7 +229,7 @@ for facesetname in keys(grid.facesets)
 end;
 
 
-ip_v = Lagrange{dim, RefCube, 2}()
+ip_v = Lagrange{dim, RefCube, 2}()^dim
 qr = QuadratureRule{dim, RefCube}(4)
 cellvalues_v = CellVectorValues(qr, ip_v);
 
@@ -237,8 +237,8 @@ ip_p = Lagrange{dim, RefCube, 1}()
 cellvalues_p = CellScalarValues(qr, ip_p);
 
 dh = DofHandler(grid)
-add!(dh, :v, dim, ip_v)
-add!(dh, :p, 1, ip_p)
+add!(dh, :v, ip_v)
+add!(dh, :p, ip_p)
 close!(dh);
 
 ch = ConstraintHandler(dh);
@@ -414,4 +414,4 @@ for (u_uc,t) in integrator
         pvd[t] = vtk
     end
 end
-vtk_save(pvd);</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../quasi_incompressible_hyperelasticity/">« Nearly Incompressible Hyperelasticity</a><a class="docs-footer-nextpage" href="../computational_homogenization/">Computational homogenization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Thursday 11 May 2023 16:26">Thursday 11 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+vtk_save(pvd);</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../quasi_incompressible_hyperelasticity/">« Nearly Incompressible Hyperelasticity</a><a class="docs-footer-nextpage" href="../computational_homogenization/">Computational homogenization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Friday 12 May 2023 22:17">Friday 12 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

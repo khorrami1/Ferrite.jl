@@ -16,7 +16,7 @@ cellvalues = CellScalarValues(qr, ip);
 facevalues = FaceScalarValues(qr_face, ip);
 
 dh = DofHandler(grid)
-add!(dh, :u, 1)
+add!(dh, :u, ip)
 close!(dh)
 
 function u_ana(x::Vec{2, T}) where {T}
