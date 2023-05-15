@@ -50,9 +50,12 @@ struct LinearElasticity{T}
     K::T
 end
 
-function doassemble(cellvalues_u::CellValues, cellvalues_p::CellValues,
-                    facevalues_u::FaceValues, K::SparseMatrixCSC, grid::Grid,
-                    dh::DofHandler, mp::LinearElasticity)
+function doassemble(
+    cellvalues_u::CellValues{<:VectorInterpolation},
+    cellvalues_p::CellValues{<:ScalarInterpolation},
+    facevalues_u::FaceValues{<:VectorInterpolation},
+    K::SparseMatrixCSC, grid::Grid, dh::DofHandler, mp::LinearElasticity
+)
     f = zeros(ndofs(dh))
     assembler = start_assemble(K, f)
     nu = getnbasefunctions(cellvalues_u)

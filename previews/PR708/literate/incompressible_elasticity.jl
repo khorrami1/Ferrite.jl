@@ -85,9 +85,13 @@ end
 # Now to the assembling of the stiffness matrix. This mixed formulation leads to a blocked
 # element matrix. Since Ferrite does not force us to use any particular matrix type we will
 # use a `PseudoBlockArray` from `BlockArrays.jl`.
-function doassemble(cellvalues_u::CellValues, cellvalues_p::CellValues,
-                    facevalues_u::FaceValues, K::SparseMatrixCSC, grid::Grid,
-                    dh::DofHandler, mp::LinearElasticity)
+
+function doassemble(
+    cellvalues_u::CellValues{<:VectorInterpolation},
+    cellvalues_p::CellValues{<:ScalarInterpolation},
+    facevalues_u::FaceValues{<:VectorInterpolation},
+    K::SparseMatrixCSC, grid::Grid, dh::DofHandler, mp::LinearElasticity
+)
     f = zeros(ndofs(dh))
     assembler = start_assemble(K, f)
     nu = getnbasefunctions(cellvalues_u)
