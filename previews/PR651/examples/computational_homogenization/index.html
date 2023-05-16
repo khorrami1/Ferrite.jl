@@ -37,7 +37,7 @@
 grid = togrid(&quot;periodic-rve.msh&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Grid{2, Triangle, Float64} with 11904 Triangle cells and 6097 nodes</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Grid{2, Triangle, Float64} with 186 Triangle cells and 112 nodes</code></pre><p>Next we construct the interpolation and quadrature rule, and combining them into cellvalues as usual:</p><pre><code class="language-julia hljs">dim = 2
 ip = Lagrange{dim, RefTetrahedron, 1}()^dim
 qr = QuadratureRule{dim, RefTetrahedron}(2)
-cellvalues = CellVectorValues(qr, ip);</code></pre><p>We define a dof handler with a displacement field <code>:u</code>:</p><pre><code class="language-julia hljs">dh = DofHandler(grid)
+cellvalues = CellValues(qr, ip);</code></pre><p>We define a dof handler with a displacement field <code>:u</code>:</p><pre><code class="language-julia hljs">dh = DofHandler(grid)
 add!(dh, :u, ip)
 close!(dh);</code></pre><p>Now we need to define boundary conditions. As discussed earlier we will solve the problem using (i) homogeneous Dirichlet boundary conditions, and (ii) periodic Dirichlet boundary conditions. We construct two different constraint handlers, one for each case. The <a href="../../reference/boundary_conditions/#Ferrite.Dirichlet"><code>Dirichlet</code></a> boundary condition we have seen in many other examples. Here we simply define the condition that the field, <code>:u</code>, should have both components prescribed to <code>0</code> on the full boundary:</p><pre><code class="language-julia hljs">ch_dirichlet = ConstraintHandler(dh)
 dirichlet = Dirichlet(
@@ -68,7 +68,7 @@ Ei = 10 * Em;</code></pre><p>As mentioned above, in order to compute the apparen
       SymmetricTensor{2,2}([1.0 0.0; 0.0 0.0]), # ε_11 loading
       SymmetricTensor{2,2}([0.0 0.0; 0.0 1.0]), # ε_22 loading
       SymmetricTensor{2,2}([0.0 0.5; 0.5 0.0]), # ε_12/ε_21 loading
-];</code></pre><p>The assembly function is nothing strange, and in particular there is no impact from the choice of boundary conditions, so the same function can be used for both cases. Since we want to solve the system 3 times, once for each macroscopic strain component, we assemble 3 right-hand-sides.</p><pre><code class="language-julia hljs">function doassemble!(cellvalues::CellVectorValues, K::SparseMatrixCSC, dh::DofHandler, εᴹ)
+];</code></pre><p>The assembly function is nothing strange, and in particular there is no impact from the choice of boundary conditions, so the same function can be used for both cases. Since we want to solve the system 3 times, once for each macroscopic strain component, we assemble 3 right-hand-sides.</p><pre><code class="language-julia hljs">function doassemble!(cellvalues::CellValues, K::SparseMatrixCSC, dh::DofHandler, εᴹ)
 
     n_basefuncs = getnbasefunctions(cellvalues)
     ndpc = ndofs_per_cell(dh)
@@ -132,7 +132,7 @@ for i in 1:size(rhs.periodic, 2)
     u_i = cholesky(Symmetric(K.periodic)) \ rhs_i      # Solve
     apply!(u_i, ch.periodic)                           # Apply BC on the solution
     push!(u.periodic, u_i)                             # Save the solution vector
-end</code></pre><p>When the solution(s) are known we can compute the averaged stress, <span>$\bar{\boldsymbol{\sigma}}$</span> in the RVE. We define a function that does this, and also returns the von Mise stress in every quadrature point for visualization.</p><pre><code class="language-julia hljs">function compute_stress(cellvalues::CellVectorValues, dh::DofHandler, u, εᴹ)
+end</code></pre><p>When the solution(s) are known we can compute the averaged stress, <span>$\bar{\boldsymbol{\sigma}}$</span> in the RVE. We define a function that does this, and also returns the von Mise stress in every quadrature point for visualization.</p><pre><code class="language-julia hljs">function compute_stress(cellvalues::CellValues, dh::DofHandler, u, εᴹ)
     σvM_qpdata = zeros(getnquadpoints(cellvalues), getncells(dh.grid))
     σ̄Ω = zero(SymmetricTensor{2,2})
     Ω = 0.0 # Total volume
@@ -163,14 +163,14 @@ projector = L2Projector(ip, grid)
 
 for i in 1:3
     σ_qp, σ̄_i = compute_stress(cellvalues, dh, u.dirichlet[i], εᴹ[i])
-    proj = project(projector, σ_qp, qr; project_to_nodes=false)
+    proj = project(projector, σ_qp, qr)
     push!(σ.dirichlet, proj)
     push!(σ̄.dirichlet, σ̄_i)
 end
 
 for i in 1:3
     σ_qp, σ̄_i = compute_stress(cellvalues, dh, u.periodic[i], εᴹ[i])
-    proj = project(projector, σ_qp, qr; project_to_nodes=false)
+    proj = project(projector, σ_qp, qr)
     push!(σ.periodic, proj)
     push!(σ̄.periodic, σ̄_i)
 end</code></pre><p>The remaining thing is to compute the homogenized stiffness. As mentioned in the introduction we can find all the components from the average stress of the sensitivity fields that we have solved for</p><p class="math-container">\[\mathsf{E}_{ijkl} = \bar{\sigma}_{ij}(\hat{\boldsymbol{u}}_{kl}).\]</p><p>So we have now already computed all the components, and just need to gather the data in a fourth order tensor:</p><pre><code class="language-julia hljs">E_dirichlet = SymmetricTensor{4,2}((i, j, k, l) -&gt; begin
@@ -232,7 +232,7 @@ grid = togrid(&quot;periodic-rve.msh&quot;)
 dim = 2
 ip = Lagrange{dim, RefTetrahedron, 1}()^dim
 qr = QuadratureRule{dim, RefTetrahedron}(2)
-cellvalues = CellVectorValues(qr, ip);
+cellvalues = CellValues(qr, ip);
 
 dh = DofHandler(grid)
 add!(dh, :u, ip)
@@ -279,7 +279,7 @@ Ei = 10 * Em;
       SymmetricTensor{2,2}([0.0 0.5; 0.5 0.0]), # ε_12/ε_21 loading
 ];
 
-function doassemble!(cellvalues::CellVectorValues, K::SparseMatrixCSC, dh::DofHandler, εᴹ)
+function doassemble!(cellvalues::CellValues, K::SparseMatrixCSC, dh::DofHandler, εᴹ)
 
     n_basefuncs = getnbasefunctions(cellvalues)
     ndpc = ndofs_per_cell(dh)
@@ -351,7 +351,7 @@ for i in 1:size(rhs.periodic, 2)
     push!(u.periodic, u_i)                             # Save the solution vector
 end
 
-function compute_stress(cellvalues::CellVectorValues, dh::DofHandler, u, εᴹ)
+function compute_stress(cellvalues::CellValues, dh::DofHandler, u, εᴹ)
     σvM_qpdata = zeros(getnquadpoints(cellvalues), getncells(dh.grid))
     σ̄Ω = zero(SymmetricTensor{2,2})
     Ω = 0.0 # Total volume
@@ -384,14 +384,14 @@ projector = L2Projector(ip, grid)
 
 for i in 1:3
     σ_qp, σ̄_i = compute_stress(cellvalues, dh, u.dirichlet[i], εᴹ[i])
-    proj = project(projector, σ_qp, qr; project_to_nodes=false)
+    proj = project(projector, σ_qp, qr)
     push!(σ.dirichlet, proj)
     push!(σ̄.dirichlet, σ̄_i)
 end
 
 for i in 1:3
     σ_qp, σ̄_i = compute_stress(cellvalues, dh, u.periodic[i], εᴹ[i])
-    proj = project(projector, σ_qp, qr; project_to_nodes=false)
+    proj = project(projector, σ_qp, qr)
     push!(σ.periodic, proj)
     push!(σ̄.periodic, σ̄_i)
 end
@@ -454,4 +454,4 @@ vtk_grid(&quot;homogenization&quot;, dh) do vtk
         vtk_point_data(vtk, dh, uM + u.periodic[i], &quot;_periodic_$i&quot;)
         vtk_point_data(vtk, projector, σ.periodic[i], &quot;σvM_periodic_$i&quot;)
     end
-end;</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../ns_vs_diffeq/">« Incompressible Navier-Stokes Equations via DifferentialEquations.jl</a><a class="docs-footer-nextpage" href="../stokes-flow/">Stokes flow »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Tuesday 9 May 2023 16:38">Tuesday 9 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+end;</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../ns_vs_diffeq/">« Incompressible Navier-Stokes Equations via DifferentialEquations.jl</a><a class="docs-footer-nextpage" href="../stokes-flow/">Stokes flow »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Tuesday 16 May 2023 19:06">Tuesday 16 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

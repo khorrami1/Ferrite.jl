@@ -1,6 +1,6 @@
 include("heat_equation.jl");
 
-function compute_heat_fluxes(cellvalues::CellScalarValues{dim,dim,T}, dh::DofHandler, a) where {dim,T}
+function compute_heat_fluxes(cellvalues::CellValues{<:ScalarInterpolation}, dh::DofHandler, a::AbstractVector{T}) where T
 
     n = getnbasefunctions(cellvalues)
     cell_dofs = zeros(Int, n)
@@ -27,7 +27,7 @@ q_gp = compute_heat_fluxes(cellvalues, dh, u);
 
 projector = L2Projector(ip, grid);
 
-q_projected = project(projector, q_gp, qr; project_to_nodes=false); # TODO: this should be default.
+q_projected = project(projector, q_gp, qr);
 
 vtk_grid("heat_equation_flux", grid) do vtk
     vtk_point_data(vtk, projector, q_projected, "q")

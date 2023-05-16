@@ -21,11 +21,11 @@ function create_values(interpolation_u, interpolation_p)
     face_qr = QuadratureRule{2,RefTetrahedron}(4)
 
     # cell and facevalues for u
-    cellvalues_u = CellVectorValues(qr, interpolation_u)
-    facevalues_u = FaceVectorValues(face_qr, interpolation_u)
+    cellvalues_u = CellValues(qr, interpolation_u)
+    facevalues_u = FaceValues(face_qr, interpolation_u)
 
     # cellvalues for p
-    cellvalues_p = CellScalarValues(qr, interpolation_p)
+    cellvalues_p = CellValues(qr, interpolation_p)
 
     return cellvalues_u, cellvalues_p, facevalues_u
 end;
@@ -151,8 +151,8 @@ function assemble_element!(Ke, fe, cell, cellvalues_u, cellvalues_p, mp, ue, pe)
     end
 end;
 
-function assemble_global!(K::SparseMatrixCSC, f, cellvalues_u::CellVectorValues{dim},
-                         cellvalues_p::CellScalarValues{dim}, dh::DofHandler, mp::NeoHooke, w) where {dim}
+function assemble_global!(K::SparseMatrixCSC, f, cellvalues_u::CellValues,
+                         cellvalues_p::CellValues, dh::DofHandler, mp::NeoHooke, w)
     nu = getnbasefunctions(cellvalues_u)
     np = getnbasefunctions(cellvalues_p)
 
