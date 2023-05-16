@@ -1,6 +1,6 @@
 include("heat_equation.jl");
 
-function compute_heat_fluxes(cellvalues::CellScalarValues{dim,T}, dh::DofHandler, a) where {dim,T}
+function compute_heat_fluxes(cellvalues::CellValues, dh::DofHandler, a::AbstractVector{T}) where T
 
     n = getnbasefunctions(cellvalues)
     cell_dofs = zeros(Int, n)

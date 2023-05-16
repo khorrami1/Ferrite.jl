@@ -20,8 +20,8 @@ function create_values()
 
     # cell and facevalues for u
     ip = Lagrange{2,RefCube,1}()^2
-    cellvalues = CellVectorValues(qr, ip)
-    facevalues = FaceVectorValues(face_qr, ip)
+    cellvalues = CellValues(qr, ip)
+    facevalues = FaceValues(face_qr, ip)
 
     return cellvalues, facevalues
 end
@@ -184,7 +184,7 @@ function update_density(dh, states, mp, ρ, topology, Δh)
     return χn1
 end
 
-function doassemble!(cellvalues::CellVectorValues{dim}, facevalues::FaceVectorValues{dim}, K::SparseMatrixCSC, grid::Grid, dh::DofHandler, mp::MaterialParameters, u, states) where {dim}
+function doassemble!(cellvalues::CellValues, facevalues::FaceValues, K::SparseMatrixCSC, grid::Grid, dh::DofHandler, mp::MaterialParameters, u, states)
     r = zeros(ndofs(dh))
     assembler = start_assemble(K, r)
     nu = getnbasefunctions(cellvalues)

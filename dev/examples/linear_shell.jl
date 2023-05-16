@@ -10,7 +10,7 @@ grid = generate_shell_grid(nels, size)
 ip = Lagrange{2,RefCube,1}()
 qr_inplane = QuadratureRule{2,RefCube}(1)
 qr_ooplane = QuadratureRule{1,RefCube}(2)
-cv = CellScalarValues(qr_inplane, ip)
+cv = CellValues(qr_inplane, ip)
 
 dh = DofHandler(grid)
 add!(dh, :u, ip^3)

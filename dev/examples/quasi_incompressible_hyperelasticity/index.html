@@ -16,11 +16,11 @@ end;</code></pre><p>The function to create corresponding cellvalues for the disp
     face_qr = QuadratureRule{2,RefTetrahedron}(4)
 
     # cell and facevalues for u
-    cellvalues_u = CellVectorValues(qr, interpolation_u)
-    facevalues_u = FaceVectorValues(face_qr, interpolation_u)
+    cellvalues_u = CellValues(qr, interpolation_u)
+    facevalues_u = FaceValues(face_qr, interpolation_u)
 
     # cellvalues for p
-    cellvalues_p = CellScalarValues(qr, interpolation_p)
+    cellvalues_p = CellValues(qr, interpolation_p)
 
     return cellvalues_u, cellvalues_p, facevalues_u
 end;</code></pre><p>We now create the function for Ψ*</p><pre><code class="language-julia hljs">function Ψ(F, p, mp::NeoHooke)
@@ -130,8 +130,8 @@ end;</code></pre><p>The function to assemble the element stiffness matrix for ea
             end
         end
     end
-end;</code></pre><p>The only thing that changes in the assembly of the global stiffness matrix is slicing the corresponding element dofs for the displacement (see <code>global_dofsu</code>) and pressure (<code>global_dofsp</code>).</p><pre><code class="language-julia hljs">function assemble_global!(K::SparseMatrixCSC, f, cellvalues_u::CellVectorValues{dim},
-                         cellvalues_p::CellScalarValues{dim}, dh::DofHandler, mp::NeoHooke, w) where {dim}
+end;</code></pre><p>The only thing that changes in the assembly of the global stiffness matrix is slicing the corresponding element dofs for the displacement (see <code>global_dofsu</code>) and pressure (<code>global_dofsp</code>).</p><pre><code class="language-julia hljs">function assemble_global!(K::SparseMatrixCSC, f, cellvalues_u::CellValues,
+                         cellvalues_p::CellValues, dh::DofHandler, mp::NeoHooke, w)
     nu = getnbasefunctions(cellvalues_u)
     np = getnbasefunctions(cellvalues_p)
 
@@ -248,11 +248,11 @@ function create_values(interpolation_u, interpolation_p)
     face_qr = QuadratureRule{2,RefTetrahedron}(4)
 
     # cell and facevalues for u
-    cellvalues_u = CellVectorValues(qr, interpolation_u)
-    facevalues_u = FaceVectorValues(face_qr, interpolation_u)
+    cellvalues_u = CellValues(qr, interpolation_u)
+    facevalues_u = FaceValues(face_qr, interpolation_u)
 
     # cellvalues for p
-    cellvalues_p = CellScalarValues(qr, interpolation_p)
+    cellvalues_p = CellValues(qr, interpolation_p)
 
     return cellvalues_u, cellvalues_p, facevalues_u
 end;
@@ -378,8 +378,8 @@ function assemble_element!(Ke, fe, cell, cellvalues_u, cellvalues_p, mp, ue, pe)
     end
 end;
 
-function assemble_global!(K::SparseMatrixCSC, f, cellvalues_u::CellVectorValues{dim},
-                         cellvalues_p::CellScalarValues{dim}, dh::DofHandler, mp::NeoHooke, w) where {dim}
+function assemble_global!(K::SparseMatrixCSC, f, cellvalues_u::CellValues,
+                         cellvalues_p::CellValues, dh::DofHandler, mp::NeoHooke, w)
     nu = getnbasefunctions(cellvalues_u)
     np = getnbasefunctions(cellvalues_p)
 
@@ -477,4 +477,4 @@ end;
 
 quadratic_u = Lagrange{3, RefTetrahedron, 2}()^3
 linear_p = Lagrange{3, RefTetrahedron, 1}()
-vol_def = solve(quadratic_u, linear_p)</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../linear_shell/">« Linear shell</a><a class="docs-footer-nextpage" href="../ns_vs_diffeq/">Incompressible Navier-Stokes Equations via DifferentialEquations.jl »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Friday 12 May 2023 22:17">Friday 12 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+vol_def = solve(quadratic_u, linear_p)</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../linear_shell/">« Linear shell</a><a class="docs-footer-nextpage" href="../ns_vs_diffeq/">Incompressible Navier-Stokes Equations via DifferentialEquations.jl »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Tuesday 16 May 2023 09:51">Tuesday 16 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

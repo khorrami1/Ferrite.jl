@@ -5,7 +5,7 @@ grid = generate_grid(Quadrilateral, (100, 100));
 dim = 2
 ip = Lagrange{dim, RefCube, 1}()
 qr = QuadratureRule{dim, RefCube}(2)
-cellvalues = CellScalarValues(qr, ip);
+cellvalues = CellValues(qr, ip);
 
 dh = DofHandler(grid)
 add!(dh, :u, ip)
@@ -32,7 +32,7 @@ add!(ch, dbc)
 close!(ch)
 update!(ch, 0.0);
 
-function doassemble_K!(K::SparseMatrixCSC, f::Vector, cellvalues::CellScalarValues{dim}, dh::DofHandler) where {dim}
+function doassemble_K!(K::SparseMatrixCSC, f::Vector, cellvalues::CellValues, dh::DofHandler)
 
     n_basefuncs = getnbasefunctions(cellvalues)
     Ke = zeros(n_basefuncs, n_basefuncs)
@@ -66,7 +66,7 @@ function doassemble_K!(K::SparseMatrixCSC, f::Vector, cellvalues::CellScalarValu
     return K, f
 end
 
-function doassemble_M!(M::SparseMatrixCSC, cellvalues::CellScalarValues{dim}, dh::DofHandler) where {dim}
+function doassemble_M!(M::SparseMatrixCSC, cellvalues::CellValues, dh::DofHandler)
 
     n_basefuncs = getnbasefunctions(cellvalues)
     Me = zeros(n_basefuncs, n_basefuncs)

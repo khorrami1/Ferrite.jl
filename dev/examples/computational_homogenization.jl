@@ -7,7 +7,7 @@ grid = togrid("periodic-rve.msh")
 dim = 2
 ip = Lagrange{dim, RefTetrahedron, 1}()^dim
 qr = QuadratureRule{dim, RefTetrahedron}(2)
-cellvalues = CellVectorValues(qr, ip);
+cellvalues = CellValues(qr, ip);
 
 dh = DofHandler(grid)
 add!(dh, :u, ip)
@@ -54,7 +54,7 @@ Ei = 10 * Em;
       SymmetricTensor{2,2}([0.0 0.5; 0.5 0.0]), # ε_12/ε_21 loading
 ];
 
-function doassemble!(cellvalues::CellVectorValues, K::SparseMatrixCSC, dh::DofHandler, εᴹ)
+function doassemble!(cellvalues::CellValues, K::SparseMatrixCSC, dh::DofHandler, εᴹ)
 
     n_basefuncs = getnbasefunctions(cellvalues)
     ndpc = ndofs_per_cell(dh)
@@ -126,7 +126,7 @@ for i in 1:size(rhs.periodic, 2)
     push!(u.periodic, u_i)                             # Save the solution vector
 end
 
-function compute_stress(cellvalues::CellVectorValues, dh::DofHandler, u, εᴹ)
+function compute_stress(cellvalues::CellValues, dh::DofHandler, u, εᴹ)
     σvM_qpdata = zeros(getnquadpoints(cellvalues), getncells(dh.grid))
     σ̄Ω = zero(SymmetricTensor{2,2})
     Ω = 0.0 # Total volume

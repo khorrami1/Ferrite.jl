@@ -17,8 +17,8 @@ end</code></pre><p>Next, we create the FE values, the DofHandler and the Dirichl
 
     # cell and facevalues for u
     ip = Lagrange{2,RefCube,1}()^2
-    cellvalues = CellVectorValues(qr, ip)
-    facevalues = FaceVectorValues(face_qr, ip)
+    cellvalues = CellValues(qr, ip)
+    facevalues = FaceValues(face_qr, ip)
 
     return cellvalues, facevalues
 end
@@ -165,7 +165,7 @@ end</code></pre><p>Finally, we put everything together to update the density. Th
     end
 
     return χn1
-end</code></pre><p>Now, we move on to the Finite Element part of the program. We use the following function to assemble our linear system.</p><pre><code class="language-julia hljs">function doassemble!(cellvalues::CellVectorValues{dim}, facevalues::FaceVectorValues{dim}, K::SparseMatrixCSC, grid::Grid, dh::DofHandler, mp::MaterialParameters, u, states) where {dim}
+end</code></pre><p>Now, we move on to the Finite Element part of the program. We use the following function to assemble our linear system.</p><pre><code class="language-julia hljs">function doassemble!(cellvalues::CellValues, facevalues::FaceValues, K::SparseMatrixCSC, grid::Grid, dh::DofHandler, mp::MaterialParameters, u, states)
     r = zeros(ndofs(dh))
     assembler = start_assemble(K, r)
     nu = getnbasefunctions(cellvalues)
@@ -378,8 +378,8 @@ function create_values()
 
     # cell and facevalues for u
     ip = Lagrange{2,RefCube,1}()^2
-    cellvalues = CellVectorValues(qr, ip)
-    facevalues = FaceVectorValues(face_qr, ip)
+    cellvalues = CellValues(qr, ip)
+    facevalues = FaceValues(face_qr, ip)
 
     return cellvalues, facevalues
 end
@@ -542,7 +542,7 @@ function update_density(dh, states, mp, ρ, topology, Δh)
     return χn1
 end
 
-function doassemble!(cellvalues::CellVectorValues{dim}, facevalues::FaceVectorValues{dim}, K::SparseMatrixCSC, grid::Grid, dh::DofHandler, mp::MaterialParameters, u, states) where {dim}
+function doassemble!(cellvalues::CellValues, facevalues::FaceValues, K::SparseMatrixCSC, grid::Grid, dh::DofHandler, mp::MaterialParameters, u, states)
     r = zeros(ndofs(dh))
     assembler = start_assemble(K, r)
     nu = getnbasefunctions(cellvalues)
@@ -732,4 +732,4 @@ end
 
 topopt(0.02, 0.5, 60, &quot;small_radius&quot;; output=:false);
 topopt(0.03, 0.5, 60, &quot;large_radius&quot;; output=:false);
-##topopt(0.02, 0.5, 60, &quot;topopt_animation&quot;; output=:true); # can be used to create animations</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../stokes-flow/">« Stokes flow</a><a class="docs-footer-nextpage" href="../../reference/quadrature/">Quadrature »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Friday 12 May 2023 22:17">Friday 12 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+##topopt(0.02, 0.5, 60, &quot;topopt_animation&quot;; output=:true); # can be used to create animations</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../stokes-flow/">« Stokes flow</a><a class="docs-footer-nextpage" href="../../reference/quadrature/">Quadrature »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Tuesday 16 May 2023 09:51">Tuesday 16 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
