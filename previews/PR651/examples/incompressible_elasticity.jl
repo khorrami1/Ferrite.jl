@@ -15,8 +15,8 @@ end;
 
 function create_values(interpolation_u, interpolation_p)
     # quadrature rules
-    qr      = QuadratureRule{2,RefTetrahedron}(3)
-    face_qr = QuadratureRule{1,RefTetrahedron}(3)
+    qr      = QuadratureRule{2,RefTriangle}(3)
+    face_qr = QuadratureRule{1,RefTriangle}(3)
 
     # cell and facevalues for u
     cellvalues_u = CellValues(qr, interpolation_u)
@@ -165,7 +165,7 @@ function solve(ν, interpolation_u, interpolation_p)
     u = Symmetric(K) \ f;
 
     # export
-    filename = "cook_" * (isa(interpolation_u, Lagrange{2,RefTetrahedron,1}) ? "linear" : "quadratic") *
+    filename = "cook_" * (isa(interpolation_u, Lagrange{RefTriangle,1}) ? "linear" : "quadratic") *
                          "_linear"
     vtk_grid(filename, dh) do vtkfile
         vtk_point_data(vtkfile, dh, u)
@@ -173,9 +173,9 @@ function solve(ν, interpolation_u, interpolation_p)
     return u
 end
 
-linear_p    = Lagrange{2,RefTetrahedron,1}()
-linear_u    = Lagrange{2,RefTetrahedron,1}()^2
-quadratic_u = Lagrange{2,RefTetrahedron,2}()^2
+linear_p    = Lagrange{RefTriangle,1}()
+linear_u    = Lagrange{RefTriangle,1}()^2
+quadratic_u = Lagrange{RefTriangle,2}()^2
 
 u1 = solve(0.4999999, linear_u,    linear_p)
 u2 = solve(0.4999999, quadratic_u, linear_p);
