@@ -230,12 +230,12 @@ end</code></pre><h3 id="Running-the-simulation"><a class="docs-heading-anchor" h
     h = 0.05 # approximate element size
     grid = setup_grid(h)
     # Interpolations
-    ipu = Lagrange{2,RefTriangle,2}() ^ 2 # quadratic
-    ipp = Lagrange{2,RefTriangle,1}()     # linear
+    ipu = Lagrange{RefTriangle,2}() ^ 2 # quadratic
+    ipp = Lagrange{RefTriangle,1}()     # linear
     # Dofs
     dh = setup_dofs(grid, ipu, ipp)
     # FE values
-    ipg = Lagrange{2,RefTriangle,1}() # linear geometric interpolation
+    ipg = Lagrange{RefTriangle,1}() # linear geometric interpolation
     cvu, cvp, fvp = setup_fevalues(ipu, ipp, ipg)
     # Boundary conditions
     ch = setup_constraints(dh, fvp)
@@ -454,12 +454,12 @@ function main()
     h = 0.05 # approximate element size
     grid = setup_grid(h)
     # Interpolations
-    ipu = Lagrange{2,RefTriangle,2}() ^ 2 # quadratic
-    ipp = Lagrange{2,RefTriangle,1}()     # linear
+    ipu = Lagrange{RefTriangle,2}() ^ 2 # quadratic
+    ipp = Lagrange{RefTriangle,1}()     # linear
     # Dofs
     dh = setup_dofs(grid, ipu, ipp)
     # FE values
-    ipg = Lagrange{2,RefTriangle,1}() # linear geometric interpolation
+    ipg = Lagrange{RefTriangle,1}() # linear geometric interpolation
     cvu, cvp, fvp = setup_fevalues(ipu, ipp, ipg)
     # Boundary conditions
     ch = setup_constraints(dh, fvp)
@@ -482,4 +482,4 @@ function main()
     return
 end
 
-main()</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../computational_homogenization/">« Computational homogenization</a><a class="docs-footer-nextpage" href="../topology_optimization/">Topology optimization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Wednesday 17 May 2023 08:33">Wednesday 17 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+main()</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../computational_homogenization/">« Computational homogenization</a><a class="docs-footer-nextpage" href="../topology_optimization/">Topology optimization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Wednesday 17 May 2023 14:45">Wednesday 17 May 2023</span>. Using Julia version 1.9.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

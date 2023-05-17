@@ -196,12 +196,12 @@ function main()
     h = 0.05 # approximate element size
     grid = setup_grid(h)
     # Interpolations
-    ipu = Lagrange{2,RefTriangle,2}() ^ 2 # quadratic
-    ipp = Lagrange{2,RefTriangle,1}()     # linear
+    ipu = Lagrange{RefTriangle,2}() ^ 2 # quadratic
+    ipp = Lagrange{RefTriangle,1}()     # linear
     # Dofs
     dh = setup_dofs(grid, ipu, ipp)
     # FE values
-    ipg = Lagrange{2,RefTriangle,1}() # linear geometric interpolation
+    ipg = Lagrange{RefTriangle,1}() # linear geometric interpolation
     cvu, cvp, fvp = setup_fevalues(ipu, ipp, ipg)
     # Boundary conditions
     ch = setup_constraints(dh, fvp)

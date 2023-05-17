@@ -19,7 +19,7 @@ function create_values()
     face_qr = QuadratureRule{1,RefQuadrilateral}(2)
 
     # cell and facevalues for u
-    ip = Lagrange{2,RefQuadrilateral,1}()^2
+    ip = Lagrange{RefQuadrilateral,1}()^2
     cellvalues = CellValues(qr, ip)
     facevalues = FaceValues(face_qr, ip)
 
@@ -28,7 +28,7 @@ end
 
 function create_dofhandler(grid)
     dh = DofHandler(grid)
-    add!(dh, :u, Lagrange{2,RefQuadrilateral,1}()^2) # displacement
+    add!(dh, :u, Lagrange{RefQuadrilateral,1}()^2) # displacement
     close!(dh)
     return dh
 end

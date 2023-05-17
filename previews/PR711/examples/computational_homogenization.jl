@@ -5,7 +5,7 @@ using FerriteGmsh
 grid = togrid("periodic-rve.msh")
 
 dim = 2
-ip = Lagrange{dim, RefTriangle, 1}()^dim
+ip = Lagrange{RefTriangle, 1}()^dim
 qr = QuadratureRule{dim, RefTriangle}(2)
 cellvalues = CellValues(qr, ip);
 
