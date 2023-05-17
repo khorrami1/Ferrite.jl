@@ -7,9 +7,9 @@ nels = (10,10)
 size = (10.0, 10.0)
 grid = generate_shell_grid(nels, size)
 
-ip = Lagrange{2,RefCube,1}()
-qr_inplane = QuadratureRule{2,RefCube}(1)
-qr_ooplane = QuadratureRule{1,RefCube}(2)
+ip = Lagrange{2,RefQuadrilateral,1}()
+qr_inplane = QuadratureRule{2,RefQuadrilateral}(1)
+qr_ooplane = QuadratureRule{1,RefLine}(2)
 cv = CellValues(qr_inplane, ip)
 
 dh = DofHandler(grid)
