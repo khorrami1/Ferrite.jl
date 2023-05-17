@@ -5,8 +5,8 @@ using FerriteGmsh
 grid = togrid("periodic-rve.msh")
 
 dim = 2
-ip = Lagrange{dim, RefTetrahedron, 1}()^dim
-qr = QuadratureRule{dim, RefTetrahedron}(2)
+ip = Lagrange{RefTriangle, 1}()^dim
+qr = QuadratureRule{dim, RefTriangle}(2)
 cellvalues = CellValues(qr, ip);
 
 dh = DofHandler(grid)

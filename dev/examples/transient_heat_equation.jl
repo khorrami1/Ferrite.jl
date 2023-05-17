@@ -3,8 +3,8 @@ using Ferrite, SparseArrays
 grid = generate_grid(Quadrilateral, (100, 100));
 
 dim = 2
-ip = Lagrange{dim, RefCube, 1}()
-qr = QuadratureRule{dim, RefCube}(2)
+ip = Lagrange{RefQuadrilateral, 1}()
+qr = QuadratureRule{dim, RefQuadrilateral}(2)
 cellvalues = CellValues(qr, ip);
 
 dh = DofHandler(grid)
