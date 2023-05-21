@@ -84,8 +84,8 @@ end
 
 function create_values(interpolation)
     # setup quadrature rules
-    qr      = QuadratureRule{3,RefTetrahedron}(2)
-    face_qr = QuadratureRule{2,RefTetrahedron}(3)
+    qr      = QuadratureRule{RefTetrahedron}(2)
+    face_qr = FaceQuadratureRule{RefTetrahedron}(3)
 
     # cell and facevalues for u
     cellvalues_u = CellValues(qr, interpolation)
