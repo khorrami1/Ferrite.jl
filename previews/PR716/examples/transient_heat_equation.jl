@@ -2,7 +2,6 @@ using Ferrite, SparseArrays
 
 grid = generate_grid(Quadrilateral, (100, 100));
 
-dim = 2
 ip = Lagrange{RefQuadrilateral, 1}()
 qr = QuadratureRule{RefQuadrilateral}(2)
 cellvalues = CellValues(qr, ip);
