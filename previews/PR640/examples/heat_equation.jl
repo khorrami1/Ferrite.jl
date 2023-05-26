@@ -2,13 +2,12 @@ using Ferrite, SparseArrays
 
 grid = generate_grid(Quadrilateral, (20, 20));
 
-dim = 2
-ip = Lagrange{dim, RefCube, 1}()
-qr = QuadratureRule{dim, RefCube}(2)
-cellvalues = CellScalarValues(qr, ip);
+ip = Lagrange{RefQuadrilateral, 1}()
+qr = QuadratureRule{RefQuadrilateral}(2)
+cellvalues = CellValues(qr, ip);
 
 dh = DofHandler(grid)
-add!(dh, :u, 1)
+add!(dh, :u, ip)
 close!(dh);
 
 K = create_sparsity_pattern(dh)
@@ -27,7 +26,7 @@ add!(ch, dbc);
 
 close!(ch)
 
-function assemble_element!(Ke::Matrix, fe::Vector, cellvalues::CellScalarValues)
+function assemble_element!(Ke::Matrix, fe::Vector, cellvalues::CellValues)
     n_basefuncs = getnbasefunctions(cellvalues)
     # Reset to 0
     fill!(Ke, 0)
@@ -53,7 +52,7 @@ function assemble_element!(Ke::Matrix, fe::Vector, cellvalues::CellScalarValues)
     return Ke, fe
 end
 
-function assemble_global(cellvalues::CellScalarValues, K::SparseMatrixCSC, dh::DofHandler)
+function assemble_global(cellvalues::CellValues, K::SparseMatrixCSC, dh::DofHandler)
     # Allocate the element stiffness matrix and element force vector
     n_basefuncs = getnbasefunctions(cellvalues)
     Ke = zeros(n_basefuncs, n_basefuncs)
