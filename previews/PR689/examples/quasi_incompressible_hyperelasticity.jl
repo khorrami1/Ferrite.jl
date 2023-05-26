@@ -17,18 +17,15 @@ end;
 
 function create_values(interpolation_u, interpolation_p)
     # quadrature rules
-    qr      = QuadratureRule{3,RefTetrahedron}(4)
-    face_qr = QuadratureRule{2,RefTetrahedron}(4)
-
-    # geometric interpolation
-    interpolation_geom = Lagrange{3,RefTetrahedron,1}()
+    qr      = QuadratureRule{RefTetrahedron}(4)
+    face_qr = FaceQuadratureRule{RefTetrahedron}(4)
 
     # cell and facevalues for u
-    cellvalues_u = CellVectorValues(qr, interpolation_u, interpolation_geom)
-    facevalues_u = FaceVectorValues(face_qr, interpolation_u, interpolation_geom)
+    cellvalues_u = CellValues(qr, interpolation_u)
+    facevalues_u = FaceValues(face_qr, interpolation_u)
 
     # cellvalues for p
-    cellvalues_p = CellScalarValues(qr, interpolation_p, interpolation_geom)
+    cellvalues_p = CellValues(qr, interpolation_p)
 
     return cellvalues_u, cellvalues_p, facevalues_u
 end;
@@ -52,8 +49,8 @@ end;
 
 function create_dofhandler(grid, ipu, ipp)
     dh = DofHandler(grid)
-    add!(dh, :u, 3, ipu) # displacement dim = 3
-    add!(dh, :p, 1, ipp) # pressure dim = 1
+    add!(dh, :u, ipu) # displacement dim = 3
+    add!(dh, :p, ipp) # pressure dim = 1
     close!(dh)
     return dh
 end;
@@ -154,8 +151,8 @@ function assemble_element!(Ke, fe, cell, cellvalues_u, cellvalues_p, mp, ue, pe)
     end
 end;
 
-function assemble_global!(K::SparseMatrixCSC, f, cellvalues_u::CellVectorValues{dim},
-                         cellvalues_p::CellScalarValues{dim}, dh::DofHandler, mp::NeoHooke, w) where {dim}
+function assemble_global!(K::SparseMatrixCSC, f, cellvalues_u::CellValues,
+                         cellvalues_p::CellValues, dh::DofHandler, mp::NeoHooke, w)
     nu = getnbasefunctions(cellvalues_u)
     np = getnbasefunctions(cellvalues_p)
 
@@ -251,9 +248,9 @@ function solve(interpolation_u, interpolation_p)
     return vol_def;
 end;
 
-quadratic = Lagrange{3, RefTetrahedron, 2}()
-linear = Lagrange{3, RefTetrahedron, 1}()
-vol_def = solve(quadratic, linear)
+quadratic_u = Lagrange{RefTetrahedron, 2}()^3
+linear_p = Lagrange{RefTetrahedron, 1}()
+vol_def = solve(quadratic_u, linear_p)
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 

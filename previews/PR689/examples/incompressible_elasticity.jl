@@ -15,26 +15,23 @@ end;
 
 function create_values(interpolation_u, interpolation_p)
     # quadrature rules
-    qr      = QuadratureRule{2,RefTetrahedron}(3)
-    face_qr = QuadratureRule{1,RefTetrahedron}(3)
-
-    # geometric interpolation
-    interpolation_geom = Lagrange{2,RefTetrahedron,1}()
+    qr      = QuadratureRule{RefTriangle}(3)
+    face_qr = FaceQuadratureRule{RefTriangle}(3)
 
     # cell and facevalues for u
-    cellvalues_u = CellVectorValues(qr, interpolation_u, interpolation_geom)
-    facevalues_u = FaceVectorValues(face_qr, interpolation_u, interpolation_geom)
+    cellvalues_u = CellValues(qr, interpolation_u)
+    facevalues_u = FaceValues(face_qr, interpolation_u)
 
     # cellvalues for p
-    cellvalues_p = CellScalarValues(qr, interpolation_p, interpolation_geom)
+    cellvalues_p = CellValues(qr, interpolation_p)
 
     return cellvalues_u, cellvalues_p, facevalues_u
 end;
 
 function create_dofhandler(grid, ipu, ipp)
     dh = DofHandler(grid)
-    add!(dh, :u, 2, ipu) # displacement
-    add!(dh, :p, 1, ipp) # pressure
+    add!(dh, :u, ipu) # displacement
+    add!(dh, :p, ipp) # pressure
     close!(dh)
     return dh
 end;
@@ -53,10 +50,12 @@ struct LinearElasticity{T}
     K::T
 end
 
-function doassemble(cellvalues_u::CellVectorValues{dim}, cellvalues_p::CellScalarValues{dim},
-                    facevalues_u::FaceVectorValues{dim}, K::SparseMatrixCSC, grid::Grid,
-                    dh::DofHandler, mp::LinearElasticity) where {dim}
-
+function doassemble(
+    cellvalues_u::CellValues{<:VectorInterpolation},
+    cellvalues_p::CellValues{<:ScalarInterpolation},
+    facevalues_u::FaceValues{<:VectorInterpolation},
+    K::SparseMatrixCSC, grid::Grid, dh::DofHandler, mp::LinearElasticity
+)
     f = zeros(ndofs(dh))
     assembler = start_assemble(K, f)
     nu = getnbasefunctions(cellvalues_u)
@@ -68,7 +67,7 @@ function doassemble(cellvalues_u::CellVectorValues{dim}, cellvalues_p::CellScala
     # traction vector
     t = Vec{2}((0.0, 1/16))
     # cache ɛdev outside the element routine to avoid some unnecessary allocations
-    ɛdev = [zero(SymmetricTensor{2, dim}) for i in 1:getnbasefunctions(cellvalues_u)]
+    ɛdev = [zero(SymmetricTensor{2, 2}) for i in 1:getnbasefunctions(cellvalues_u)]
 
     for cell in CellIterator(dh)
         fill!(ke, 0)
@@ -166,7 +165,7 @@ function solve(ν, interpolation_u, interpolation_p)
     u = Symmetric(K) \ f;
 
     # export
-    filename = "cook_" * (isa(interpolation_u, Lagrange{2,RefTetrahedron,1}) ? "linear" : "quadratic") *
+    filename = "cook_" * (isa(interpolation_u, Lagrange{RefTriangle,1}) ? "linear" : "quadratic") *
                          "_linear"
     vtk_grid(filename, dh) do vtkfile
         vtk_point_data(vtkfile, dh, u)
@@ -174,11 +173,12 @@ function solve(ν, interpolation_u, interpolation_p)
     return u
 end
 
-linear    = Lagrange{2,RefTetrahedron,1}()
-quadratic = Lagrange{2,RefTetrahedron,2}()
+linear_p    = Lagrange{RefTriangle,1}()
+linear_u    = Lagrange{RefTriangle,1}()^2
+quadratic_u = Lagrange{RefTriangle,2}()^2
 
-u1 = solve(0.4999999, linear, linear)
-u2 = solve(0.4999999, quadratic, linear);
+u1 = solve(0.4999999, linear_u,    linear_p)
+u2 = solve(0.4999999, quadratic_u, linear_p);
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 

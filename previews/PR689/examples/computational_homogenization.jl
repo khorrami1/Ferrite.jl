@@ -5,12 +5,12 @@ using FerriteGmsh
 grid = togrid("periodic-rve.msh")
 
 dim = 2
-ip = Lagrange{dim, RefTetrahedron, 1}()
-qr = QuadratureRule{dim, RefTetrahedron}(2)
-cellvalues = CellVectorValues(qr, ip);
+ip = Lagrange{RefTriangle, 1}()^dim
+qr = QuadratureRule{RefTriangle}(2)
+cellvalues = CellValues(qr, ip);
 
 dh = DofHandler(grid)
-add!(dh, :u, 2)
+add!(dh, :u, ip)
 close!(dh);
 
 ch_dirichlet = ConstraintHandler(dh)
@@ -54,7 +54,7 @@ Ei = 10 * Em;
       SymmetricTensor{2,2}([0.0 0.5; 0.5 0.0]), # ε_12/ε_21 loading
 ];
 
-function doassemble!(cellvalues::CellVectorValues, K::SparseMatrixCSC, dh::DofHandler, εᴹ)
+function doassemble!(cellvalues::CellValues, K::SparseMatrixCSC, dh::DofHandler, εᴹ)
 
     n_basefuncs = getnbasefunctions(cellvalues)
     ndpc = ndofs_per_cell(dh)
@@ -126,7 +126,7 @@ for i in 1:size(rhs.periodic, 2)
     push!(u.periodic, u_i)                             # Save the solution vector
 end
 
-function compute_stress(cellvalues::CellVectorValues, dh::DofHandler, u, εᴹ)
+function compute_stress(cellvalues::CellValues, dh::DofHandler, u, εᴹ)
     σvM_qpdata = zeros(getnquadpoints(cellvalues), getncells(dh.grid))
     σ̄Ω = zero(SymmetricTensor{2,2})
     Ω = 0.0 # Total volume
@@ -159,14 +159,14 @@ projector = L2Projector(ip, grid)
 
 for i in 1:3
     σ_qp, σ̄_i = compute_stress(cellvalues, dh, u.dirichlet[i], εᴹ[i])
-    proj = project(projector, σ_qp, qr; project_to_nodes=false)
+    proj = project(projector, σ_qp, qr)
     push!(σ.dirichlet, proj)
     push!(σ̄.dirichlet, σ̄_i)
 end
 
 for i in 1:3
     σ_qp, σ̄_i = compute_stress(cellvalues, dh, u.periodic[i], εᴹ[i])
-    proj = project(projector, σ_qp, qr; project_to_nodes=false)
+    proj = project(projector, σ_qp, qr)
     push!(σ.periodic, proj)
     push!(σ̄.periodic, σ̄_i)
 end
