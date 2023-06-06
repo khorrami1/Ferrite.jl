@@ -11,6 +11,10 @@ if liveserver
 end
 
 using Documenter, Ferrite, FerriteGmsh, FerriteMeshParser
+using SparseArrays, LinearAlgebra
+
+using BlockArrays
+const FerriteBlockArrays = Base.get_extension(Ferrite, :FerriteBlockArrays)
 
 const is_ci = haskey(ENV, "GITHUB_ACTIONS")
 
@@ -53,6 +57,7 @@ create_documenter_changelog()
             "Topic guide overview" => "topics/index.md",
             "topics/fe_intro.md",
             "topics/degrees_of_freedom.md",
+            "topics/sparse_matrix.md",
             "topics/assembly.md",
             "topics/boundary_conditions.md",
             "topics/constraints.md",
@@ -65,6 +70,7 @@ create_documenter_changelog()
             "reference/interpolations.md",
             "reference/fevalues.md",
             "reference/dofhandler.md",
+            "reference/sparsity_pattern.md",
             "reference/assembly.md",
             "reference/boundary_conditions.md",
             "reference/grid.md",

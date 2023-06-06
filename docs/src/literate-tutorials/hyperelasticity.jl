@@ -363,7 +363,7 @@ function solve()
     apply!(un, dbcs)
 
     ## Create sparse matrix and residual vector
-    K = create_sparsity_pattern(dh)
+    K = create_matrix(dh)
     g = zeros(_ndofs)
 
     ## Perform Newton iterations
