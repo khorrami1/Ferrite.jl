@@ -30,17 +30,16 @@ end;
 
 grid = generate_grid(Quadrilateral, (x_cells, y_cells), Vec{2}((0.0, 0.0)), Vec{2}((0.55, 0.41)));   #hide
 
-ip_v = Lagrange{dim, RefCube, 2}()
-ip_geom = Lagrange{dim, RefCube, 1}()
-qr = QuadratureRule{dim, RefCube}(4)
-cellvalues_v = CellVectorValues(qr, ip_v, ip_geom);
+ip_v = Lagrange{RefQuadrilateral, 2}()^dim
+qr = QuadratureRule{RefQuadrilateral}(4)
+cellvalues_v = CellValues(qr, ip_v);
 
-ip_p = Lagrange{dim, RefCube, 1}()
-cellvalues_p = CellScalarValues(qr, ip_p, ip_geom);
+ip_p = Lagrange{RefQuadrilateral, 1}()
+cellvalues_p = CellValues(qr, ip_p);
 
 dh = DofHandler(grid)
-add!(dh, :v, dim, ip_v)
-add!(dh, :p, 1, ip_p)
+add!(dh, :v, ip_v)
+add!(dh, :p, ip_p)
 close!(dh);
 
 ch = ConstraintHandler(dh);
@@ -64,7 +63,7 @@ add!(ch, inflow_bc);
 close!(ch)
 update!(ch, 0.0);
 
-function assemble_mass_matrix(cellvalues_v::CellVectorValues{dim}, cellvalues_p::CellScalarValues{dim}, M::SparseMatrixCSC, dh::DofHandler) where {dim}
+function assemble_mass_matrix(cellvalues_v::CellValues, cellvalues_p::CellValues, M::SparseMatrixCSC, dh::DofHandler)
     # Allocate a buffer for the local matrix and some helpers, together with the assembler.
     n_basefuncs_v = getnbasefunctions(cellvalues_v)
     n_basefuncs_p = getnbasefunctions(cellvalues_p)
@@ -95,7 +94,7 @@ function assemble_mass_matrix(cellvalues_v::CellVectorValues{dim}, cellvalues_p:
     return M
 end;
 
-function assemble_stokes_matrix(cellvalues_v::CellVectorValues{dim}, cellvalues_p::CellScalarValues{dim}, ν, K::SparseMatrixCSC, dh::DofHandler) where {dim}
+function assemble_stokes_matrix(cellvalues_v::CellValues, cellvalues_p::CellValues, ν, K::SparseMatrixCSC, dh::DofHandler)
     # Again, some buffers and helpers
     n_basefuncs_v = getnbasefunctions(cellvalues_v)
     n_basefuncs_p = getnbasefunctions(cellvalues_p)
@@ -158,7 +157,7 @@ struct RHSparams
     K::SparseMatrixCSC
     ch::ConstraintHandler
     dh::DofHandler
-    cellvalues_v::CellVectorValues
+    cellvalues_v::CellValues
 end
 p = RHSparams(K, ch, dh, cellvalues_v)
 
