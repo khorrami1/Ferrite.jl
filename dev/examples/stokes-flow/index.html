@@ -133,7 +133,7 @@ end</code></pre><h3 id="Boundary-conditions-and-constraints"><a class="docs-head
     # Loop over all the boundaries
     for (ci, fi) in set
         Ce .= 0
-        getcoordinates!(element_coords, dh.grid, ci)
+        get_cell_coordinates!(element_coords, dh.grid, ci)
         reinit!(fvp, element_coords, fi)
         celldofs!(element_dofs, dh, ci)
         for qp in 1:getnquadpoints(fvp)
@@ -216,7 +216,7 @@ end</code></pre><h3 id="Global-and-local-assembly"><a class="docs-heading-anchor
             end
             # rhs
             for (i, I) in pairs(range_u)
-                x = spatial_coordinate(cvu, qp, getcoordinates(cell))
+                x = spatial_coordinate(cvu, qp, get_cell_coordinates(cell))
                 b = exp(-100 * norm(x - Vec{2}((0.75, 0.1)))^2)
                 bv = Vec{2}((b, 0.0))
                 fe[I] += (ϕᵤ[i] ⋅ bv) * dΩ
@@ -351,7 +351,7 @@ function setup_mean_constraint(dh, fvp)
     # Loop over all the boundaries
     for (ci, fi) in set
         Ce .= 0
-        getcoordinates!(element_coords, dh.grid, ci)
+        get_cell_coordinates!(element_coords, dh.grid, ci)
         reinit!(fvp, element_coords, fi)
         celldofs!(element_dofs, dh, ci)
         for qp in 1:getnquadpoints(fvp)
@@ -438,7 +438,7 @@ function assemble_system!(K, f, dh, cvu, cvp)
             end
             # rhs
             for (i, I) in pairs(range_u)
-                x = spatial_coordinate(cvu, qp, getcoordinates(cell))
+                x = spatial_coordinate(cvu, qp, get_cell_coordinates(cell))
                 b = exp(-100 * norm(x - Vec{2}((0.75, 0.1)))^2)
                 bv = Vec{2}((b, 0.0))
                 fe[I] += (ϕᵤ[i] ⋅ bv) * dΩ
@@ -482,4 +482,4 @@ function main()
     return
 end
 
-main()</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../computational_homogenization/">« Computational homogenization</a><a class="docs-footer-nextpage" href="../topology_optimization/">Topology optimization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Tuesday 13 June 2023 12:39">Tuesday 13 June 2023</span>. Using Julia version 1.9.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+main()</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../computational_homogenization/">« Computational homogenization</a><a class="docs-footer-nextpage" href="../topology_optimization/">Topology optimization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Tuesday 13 June 2023 14:58">Tuesday 13 June 2023</span>. Using Julia version 1.9.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

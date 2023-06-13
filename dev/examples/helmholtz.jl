@@ -54,7 +54,7 @@ function doassemble(cellvalues::CellValues, facevalues::FaceValues,
     for (cellcount, cell) in enumerate(CellIterator(dh))
         fill!(Ke, 0)
         fill!(fe, 0)
-        coords = getcoordinates(cell)
+        coords = get_cell_coordinates(cell)
 
         reinit!(cellvalues, cell)
 
