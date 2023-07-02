@@ -19,10 +19,12 @@ f_i^\mathrm{int,u} &amp;= \int_\Omega [\boldsymbol{\delta N}^\mathrm{u}_i\otimes
 &amp;= \int_\Gamma \boldsymbol{\delta N}^\mathrm{u}_i \cdot \boldsymbol{t} \mathrm{d} \Gamma \\
 f_i^\mathrm{int,p} &amp;= \int_\Omega \delta N_i^\mathrm{p} [\alpha [\dot{\boldsymbol{u}}\cdot\boldsymbol{\nabla}]  + \beta\dot{p}] + \boldsymbol{\nabla}(\delta N_i^\mathrm{p}) \cdot [k \boldsymbol{\nabla}(p)] \mathrm{d}\Omega
 &amp;= \int_\Gamma \delta N_i^\mathrm{p} w_\mathrm{n} \mathrm{d} \Gamma
-\end{aligned}\]</p><p>Approximating the time-derivatives, <span>$\dot{\boldsymbol{u}}\approx \left[\boldsymbol{u}-{}^n\boldsymbol{u}\right]/\Delta t$</span> and <span>$\dot{p}\approx \left[p-{}^np\right]/\Delta t$</span>, we can implement the finite element equations in the residual form <span>$r_i(\boldsymbol{a}(t), t) = 0$</span> where the vector <span>$\boldsymbol{a}$</span> contains all unknown displacements <span>$u_i$</span> and pressures <span>$p_i$</span>.</p><p>The jacobian, <span>$K_{ij} = \partial r_i/\partial a_j$</span>, is then split into four parts, \begin{aligned} K<em>{ij}^\mathrm{uu} = \frac{\partial r</em>i^\mathrm{u}}{\partial u<em>j} = \int</em>\Omega [\boldsymbol{\delta N}^\mathrm{u}<em>i\otimes\boldsymbol{\nabla}]^\mathrm{sym} : \boldsymbol{\mathsf{C}} : [\boldsymbol{N}</em>j^\mathrm{u}\otimes\boldsymbol{\nabla}]^\mathrm{sym}\ \mathrm{d}\Omega \
-K<em>{ij}^\mathrm{up} = \frac{\partial r</em>i^\mathrm{u}}{\partial p<em>j} = - \int</em>\Omega [\boldsymbol{\delta N}^\mathrm{u}<em>i \cdot \boldsymbol{\nabla}] \alpha N</em>j^\mathrm{p}\ \mathrm{d}\Omega \
-K<em>{ij}^\mathrm{pu} = \frac{\partial r</em>i^\mathrm{p}}{\partial u<em>j} = \int</em>\Omega \delta N<em>i^\mathrm{p} \frac{\alpha}{\Delta t} [\boldsymbol{N}</em>j^\mathrm{u} \cdot\boldsymbol{\nabla}]\ \mathrm{d}\Omega\
-K<em>{ij}^\mathrm{pp} = \frac{\partial r</em>i^\mathrm{p}}{\partial p<em>j} = \int</em>\Omega \delta N<em>i^\mathrm{p} \frac{N</em>j^\mathrm{p}}{\Delta t} + \boldsymbol{\nabla}(\delta N<em>i^\mathrm{p}) \cdot [k \boldsymbol{\nabla}(N</em>j^\mathrm{p})] \mathrm{d}\Omega \end{aligned}</p><p>We could assemble one stiffness matrix and one mass matrix, which would be constant, but for simplicity we only consider a single system matrix that depends on the time step, and assemble this for each step. The equations are still linear, so no iterations are required.</p><h2 id="Implementation"><a class="docs-heading-anchor" href="#Implementation">Implementation</a><a id="Implementation-1"></a><a class="docs-heading-anchor-permalink" href="#Implementation" title="Permalink"></a></h2><p>We now solve the problem step by step. The full program with fewer comments is found in the final <a href="#porous-media-plain-program">section</a></p><p>Required packages</p><pre><code class="language-julia hljs">using Ferrite, FerriteMeshParser, Tensors</code></pre><h3 id="Elasticity"><a class="docs-heading-anchor" href="#Elasticity">Elasticity</a><a id="Elasticity-1"></a><a class="docs-heading-anchor-permalink" href="#Elasticity" title="Permalink"></a></h3><p>We start by defining the elastic material type, containing the elastic stiffness, for the linear elastic impermeable solid aggregates.</p><pre><code class="language-julia hljs">struct Elastic{T}
+\end{aligned}\]</p><p>Approximating the time-derivatives, <span>$\dot{\boldsymbol{u}}\approx \left[\boldsymbol{u}-{}^n\boldsymbol{u}\right]/\Delta t$</span> and <span>$\dot{p}\approx \left[p-{}^np\right]/\Delta t$</span>, we can implement the finite element equations in the residual form <span>$r_i(\boldsymbol{a}(t), t) = 0$</span> where the vector <span>$\boldsymbol{a}$</span> contains all unknown displacements <span>$u_i$</span> and pressures <span>$p_i$</span>.</p><p>The jacobian, <span>$K_{ij} = \partial r_i/\partial a_j$</span>, is then split into four parts,</p><p class="math-container">\[\begin{aligned}
+K_{ij}^\mathrm{uu} &amp;= \frac{\partial r_i^\mathrm{u}}{\partial u_j} = \int_\Omega [\boldsymbol{\delta N}^\mathrm{u}_i\otimes\boldsymbol{\nabla}]^\mathrm{sym} : \boldsymbol{\mathsf{C}} : [\boldsymbol{N}_j^\mathrm{u}\otimes\boldsymbol{\nabla}]^\mathrm{sym}\ \mathrm{d}\Omega \\
+K_{ij}^\mathrm{up} &amp;= \frac{\partial r_i^\mathrm{u}}{\partial p_j} = - \int_\Omega [\boldsymbol{\delta N}^\mathrm{u}_i \cdot \boldsymbol{\nabla}] \alpha N_j^\mathrm{p}\ \mathrm{d}\Omega \\
+K_{ij}^\mathrm{pu} &amp;= \frac{\partial r_i^\mathrm{p}}{\partial u_j} = \int_\Omega \delta N_i^\mathrm{p} \frac{\alpha}{\Delta t} [\boldsymbol{N}_j^\mathrm{u} \cdot\boldsymbol{\nabla}]\ \mathrm{d}\Omega\\
+K_{ij}^\mathrm{pp} &amp;= \frac{\partial r_i^\mathrm{p}}{\partial p_j} = \int_\Omega \delta N_i^\mathrm{p} \frac{N_j^\mathrm{p}}{\Delta t} + \boldsymbol{\nabla}(\delta N_i^\mathrm{p}) \cdot [k \boldsymbol{\nabla}(N_j^\mathrm{p})] \mathrm{d}\Omega
+\end{aligned}\]</p><p>We could assemble one stiffness matrix and one mass matrix, which would be constant, but for simplicity we only consider a single system matrix that depends on the time step, and assemble this for each step. The equations are still linear, so no iterations are required.</p><h2 id="Implementation"><a class="docs-heading-anchor" href="#Implementation">Implementation</a><a id="Implementation-1"></a><a class="docs-heading-anchor-permalink" href="#Implementation" title="Permalink"></a></h2><p>We now solve the problem step by step. The full program with fewer comments is found in the final <a href="#porous-media-plain-program">section</a></p><p>Required packages</p><pre><code class="language-julia hljs">using Ferrite, FerriteMeshParser, Tensors</code></pre><h3 id="Elasticity"><a class="docs-heading-anchor" href="#Elasticity">Elasticity</a><a id="Elasticity-1"></a><a class="docs-heading-anchor-permalink" href="#Elasticity" title="Permalink"></a></h3><p>We start by defining the elastic material type, containing the elastic stiffness, for the linear elastic impermeable solid aggregates.</p><pre><code class="language-julia hljs">struct Elastic{T}
     C::SymmetricTensor{4,2,T,9}
 end
 function Elastic(;E=20.e3, ν=0.3)
@@ -32,7 +34,7 @@ function Elastic(;E=20.e3, ν=0.3)
     I4vol = I2⊗I2
     I4dev = minorsymmetric(otimesu(I2,I2)) - I4vol / 3
     return Elastic(2G*I4dev + K*I4vol)
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Main.Elastic</code></pre><p>Next, we define the element routine for the solid aggregates, where we dispatch on the <code>Elastic</code> material struct. Note that the unused inputs here are used for the porous matrix below.</p><pre><code class="language-julia hljs">function element_routine!(Ke, re, material::Elastic, cv, cell, a, args...)
+end;</code></pre><p>Next, we define the element routine for the solid aggregates, where we dispatch on the <code>Elastic</code> material struct. Note that the unused inputs here are used for the porous matrix below.</p><pre><code class="language-julia hljs">function element_routine!(Ke, re, material::Elastic, cv, cell, a, args...)
     reinit!(cv, cell)
     n_basefuncs = getnbasefunctions(cv)
 
@@ -49,14 +51,14 @@ end</code></pre><pre class="documenter-example-output"><code class="nohighlight 
             end
         end
     end
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">element_routine! (generic function with 1 method)</code></pre><h3 id="PoroElasticity"><a class="docs-heading-anchor" href="#PoroElasticity">PoroElasticity</a><a id="PoroElasticity-1"></a><a class="docs-heading-anchor-permalink" href="#PoroElasticity" title="Permalink"></a></h3><p>To define the poroelastic material, we re-use the elastic part from above for the skeleton, and add the additional required material parameters.</p><pre><code class="language-julia hljs">struct PoroElastic{T}
+end;</code></pre><h3 id="PoroElasticity"><a class="docs-heading-anchor" href="#PoroElasticity">PoroElasticity</a><a id="PoroElasticity-1"></a><a class="docs-heading-anchor-permalink" href="#PoroElasticity" title="Permalink"></a></h3><p>To define the poroelastic material, we re-use the elastic part from above for the skeleton, and add the additional required material parameters.</p><pre><code class="language-julia hljs">struct PoroElastic{T}
     elastic::Elastic{T} ## Skeleton stiffness
     k::T     ## Permeability of liquid   [mm^4/(Ns)]
     ϕ::T     ## Porosity                 [-]
     α::T     ## Biot&#39;s coefficient       [-]
     β::T     ## Liquid compressibility   [1/MPa]
 end
-PoroElastic(;elastic, k, ϕ, α, β) = PoroElastic(elastic, k, ϕ, α, β)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Main.PoroElastic</code></pre><p>The element routine requires a few more inputs since we have two fields, as well as the dependence on the rates of the displacements and pressure. Again, we dispatch on the material type.</p><pre><code class="language-julia hljs">function element_routine!(Ke, re, m::PoroElastic, cvs::Tuple, cell, a, a_old, Δt, sdh)
+PoroElastic(;elastic, k, ϕ, α, β) = PoroElastic(elastic, k, ϕ, α, β);</code></pre><p>The element routine requires a few more inputs since we have two fields, as well as the dependence on the rates of the displacements and pressure. Again, we dispatch on the material type.</p><pre><code class="language-julia hljs">function element_routine!(Ke, re, m::PoroElastic, cvs::Tuple, cell, a, a_old, Δt, sdh)
     # Setup cellvalues and give easier names
     reinit!.(cvs, (cell,))
     cv_u, cv_p = cvs
@@ -106,16 +108,16 @@ PoroElastic(;elastic, k, ϕ, α, β) = PoroElastic(elastic, k, ϕ, α, β)</code
             end
         end
     end
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">element_routine! (generic function with 2 methods)</code></pre><h3 id="Assembly"><a class="docs-heading-anchor" href="#Assembly">Assembly</a><a id="Assembly-1"></a><a class="docs-heading-anchor-permalink" href="#Assembly" title="Permalink"></a></h3><p>To organize the different domains, we&#39;ll first define a container type</p><pre><code class="language-julia hljs">struct FEDomain{M,CV,SDH&lt;:SubDofHandler}
+end;</code></pre><h3 id="Assembly"><a class="docs-heading-anchor" href="#Assembly">Assembly</a><a id="Assembly-1"></a><a class="docs-heading-anchor-permalink" href="#Assembly" title="Permalink"></a></h3><p>To organize the different domains, we&#39;ll first define a container type</p><pre><code class="language-julia hljs">struct FEDomain{M,CV,SDH&lt;:SubDofHandler}
     material::M
     cellvalues::CV
     sdh::SDH
-end</code></pre><p>And then we can loop over a vector of such domains, allowing us to loop over each domain, to assemble the contributions from each cell in that domain (given by the <code>SubDofHandler</code>&#39;s cellset)</p><pre><code class="language-julia hljs">function doassemble!(K, r, domains::Vector{&lt;:FEDomain}, a, a_old, Δt)
+end;</code></pre><p>And then we can loop over a vector of such domains, allowing us to loop over each domain, to assemble the contributions from each cell in that domain (given by the <code>SubDofHandler</code>&#39;s cellset)</p><pre><code class="language-julia hljs">function doassemble!(K, r, domains::Vector{&lt;:FEDomain}, a, a_old, Δt)
     assembler = start_assemble(K, r)
     for domain in domains
         doassemble!(assembler, domain, a, a_old, Δt)
     end
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">doassemble! (generic function with 1 method)</code></pre><p>For one domain (corresponding to a specific SubDofHandler), we can then loop over all cells in its cellset. This ensures that the calls to the <code>element_routine</code> are type stable.</p><pre><code class="language-julia hljs">function doassemble!(assembler, domain::FEDomain, a, a_old, Δt)
+end;</code></pre><p>For one domain (corresponding to a specific SubDofHandler), we can then loop over all cells in its cellset. This ensures that the calls to the <code>element_routine</code> are type stable.</p><pre><code class="language-julia hljs">function doassemble!(assembler, domain::FEDomain, a, a_old, Δt)
     material = domain.material
     cv = domain.cellvalues
     sdh = domain.sdh
@@ -133,7 +135,7 @@ end</code></pre><pre class="documenter-example-output"><code class="nohighlight 
         element_routine!(Ke, re, material, cv, cell, ae, ae_old, Δt, sdh)
         assemble!(assembler, celldofs(cell), Ke, re)
     end
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">doassemble! (generic function with 2 methods)</code></pre><h3 id="Mesh-import"><a class="docs-heading-anchor" href="#Mesh-import">Mesh import</a><a id="Mesh-import-1"></a><a class="docs-heading-anchor-permalink" href="#Mesh-import" title="Permalink"></a></h3><p>In this example, we import the mesh from the Abaqus input file, <a href="../porous_media_0p25.inp"><code>porous_media_0p25.inp</code></a> using <code>FerriteMeshParser</code>&#39;s <code>get_ferrite_grid</code> function. We then create one cellset for each phase (solid and porous) for each element type. These 4 sets will later be used in their own <code>SubDofHandler</code></p><pre><code class="language-julia hljs">function get_grid()
+end;</code></pre><h3 id="Mesh-import"><a class="docs-heading-anchor" href="#Mesh-import">Mesh import</a><a id="Mesh-import-1"></a><a class="docs-heading-anchor-permalink" href="#Mesh-import" title="Permalink"></a></h3><p>In this example, we import the mesh from the Abaqus input file, <a href="../porous_media_0p25.inp"><code>porous_media_0p25.inp</code></a> using <code>FerriteMeshParser</code>&#39;s <code>get_ferrite_grid</code> function. We then create one cellset for each phase (solid and porous) for each element type. These 4 sets will later be used in their own <code>SubDofHandler</code></p><pre><code class="language-julia hljs">function get_grid()
     # Import grid from abaqus mesh
     grid = get_ferrite_grid(joinpath(@__DIR__, &quot;porous_media_0p25.inp&quot;))
 
@@ -143,7 +145,7 @@ end</code></pre><pre class="documenter-example-output"><code class="nohighlight 
     addcellset!(grid, &quot;porous3&quot;, intersect(getcellset(grid, &quot;porous&quot;), getcellset(grid, &quot;CPS3&quot;)))
     addcellset!(grid, &quot;porous4&quot;, intersect(getcellset(grid, &quot;porous&quot;), getcellset(grid, &quot;CPS4R&quot;)))
     return grid
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">get_grid (generic function with 1 method)</code></pre><h3 id="Problem-setup"><a class="docs-heading-anchor" href="#Problem-setup">Problem setup</a><a id="Problem-setup-1"></a><a class="docs-heading-anchor-permalink" href="#Problem-setup" title="Permalink"></a></h3><p>Define the finite element interpolation, integration, and boundary conditions.</p><pre><code class="language-julia hljs">function setup_problem(;t_rise=0.1, u_max=-0.1)
+end;</code></pre><h3 id="Problem-setup"><a class="docs-heading-anchor" href="#Problem-setup">Problem setup</a><a id="Problem-setup-1"></a><a class="docs-heading-anchor-permalink" href="#Problem-setup" title="Permalink"></a></h3><p>Define the finite element interpolation, integration, and boundary conditions.</p><pre><code class="language-julia hljs">function setup_problem(;t_rise=0.1, u_max=-0.1)
 
     grid = get_grid()
 
@@ -206,7 +208,7 @@ end</code></pre><pre class="documenter-example-output"><code class="nohighlight 
     close!(ch)
 
     return dh, ch, domains
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">setup_problem (generic function with 1 method)</code></pre><h3 id="Solving"><a class="docs-heading-anchor" href="#Solving">Solving</a><a id="Solving-1"></a><a class="docs-heading-anchor-permalink" href="#Solving" title="Permalink"></a></h3><p>Given the <code>MixedDofHandler</code>, <code>ConstraintHandler</code>, and <code>CellValues</code>, we can solve the problem by stepping through the time history</p><pre><code class="language-julia hljs">function solve(dh, ch, domains; Δt=0.025, t_total=1.0)
+end;</code></pre><h3 id="Solving"><a class="docs-heading-anchor" href="#Solving">Solving</a><a id="Solving-1"></a><a class="docs-heading-anchor-permalink" href="#Solving" title="Permalink"></a></h3><p>Given the <code>MixedDofHandler</code>, <code>ConstraintHandler</code>, and <code>CellValues</code>, we can solve the problem by stepping through the time history</p><pre><code class="language-julia hljs">function solve(dh, ch, domains; Δt=0.025, t_total=1.0)
     K = create_sparsity_pattern(dh);
     r = zeros(ndofs(dh))
     a = zeros(ndofs(dh))
@@ -230,28 +232,8 @@ end</code></pre><pre class="documenter-example-output"><code class="nohighlight 
         end
     end
     vtk_save(pvd);
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">solve (generic function with 1 method)</code></pre><p>Finally we call the functions to actually run the code</p><pre><code class="language-julia hljs">dh, ch, domains = setup_problem()
-solve(dh, ch, domains)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">42-element Vector{String}:
- &quot;porous_media.pvd&quot;
- &quot;porous_media-1.vtu&quot;
- &quot;porous_media-2.vtu&quot;
- &quot;porous_media-3.vtu&quot;
- &quot;porous_media-4.vtu&quot;
- &quot;porous_media-5.vtu&quot;
- &quot;porous_media-6.vtu&quot;
- &quot;porous_media-7.vtu&quot;
- &quot;porous_media-8.vtu&quot;
- &quot;porous_media-9.vtu&quot;
- ⋮
- &quot;porous_media-33.vtu&quot;
- &quot;porous_media-34.vtu&quot;
- &quot;porous_media-35.vtu&quot;
- &quot;porous_media-36.vtu&quot;
- &quot;porous_media-37.vtu&quot;
- &quot;porous_media-38.vtu&quot;
- &quot;porous_media-39.vtu&quot;
- &quot;porous_media-40.vtu&quot;
- &quot;porous_media-41.vtu&quot;</code></pre><h2 id="porous-media-plain-program"><a class="docs-heading-anchor" href="#porous-media-plain-program">Plain program</a><a id="porous-media-plain-program-1"></a><a class="docs-heading-anchor-permalink" href="#porous-media-plain-program" title="Permalink"></a></h2><p>Here follows a version of the program without any comments. The file is also available here: <a href="../porous_media.jl"><code>porous_media.jl</code></a>.</p><pre><code class="language-julia hljs">using Ferrite, FerriteMeshParser, Tensors
+end;</code></pre><p>Finally we call the functions to actually run the code</p><pre><code class="language-julia hljs">dh, ch, domains = setup_problem()
+solve(dh, ch, domains);</code></pre><h2 id="porous-media-plain-program"><a class="docs-heading-anchor" href="#porous-media-plain-program">Plain program</a><a id="porous-media-plain-program-1"></a><a class="docs-heading-anchor-permalink" href="#porous-media-plain-program" title="Permalink"></a></h2><p>Here follows a version of the program without any comments. The file is also available here: <a href="../porous_media.jl"><code>porous_media.jl</code></a>.</p><pre><code class="language-julia hljs">using Ferrite, FerriteMeshParser, Tensors
 
 struct Elastic{T}
     C::SymmetricTensor{4,2,T,9}
@@ -263,7 +245,7 @@ function Elastic(;E=20.e3, ν=0.3)
     I4vol = I2⊗I2
     I4dev = minorsymmetric(otimesu(I2,I2)) - I4vol / 3
     return Elastic(2G*I4dev + K*I4vol)
-end
+end;
 
 function element_routine!(Ke, re, material::Elastic, cv, cell, a, args...)
     reinit!(cv, cell)
@@ -282,7 +264,7 @@ function element_routine!(Ke, re, material::Elastic, cv, cell, a, args...)
             end
         end
     end
-end
+end;
 
 struct PoroElastic{T}
     elastic::Elastic{T} ## Skeleton stiffness
@@ -291,7 +273,7 @@ struct PoroElastic{T}
     α::T     ## Biot&#39;s coefficient       [-]
     β::T     ## Liquid compressibility   [1/MPa]
 end
-PoroElastic(;elastic, k, ϕ, α, β) = PoroElastic(elastic, k, ϕ, α, β)
+PoroElastic(;elastic, k, ϕ, α, β) = PoroElastic(elastic, k, ϕ, α, β);
 
 function element_routine!(Ke, re, m::PoroElastic, cvs::Tuple, cell, a, a_old, Δt, sdh)
     # Setup cellvalues and give easier names
@@ -343,20 +325,20 @@ function element_routine!(Ke, re, m::PoroElastic, cvs::Tuple, cell, a, a_old, Δ
             end
         end
     end
-end
+end;
 
 struct FEDomain{M,CV,SDH&lt;:SubDofHandler}
     material::M
     cellvalues::CV
     sdh::SDH
-end
+end;
 
 function doassemble!(K, r, domains::Vector{&lt;:FEDomain}, a, a_old, Δt)
     assembler = start_assemble(K, r)
     for domain in domains
         doassemble!(assembler, domain, a, a_old, Δt)
     end
-end
+end;
 
 function doassemble!(assembler, domain::FEDomain, a, a_old, Δt)
     material = domain.material
@@ -376,7 +358,7 @@ function doassemble!(assembler, domain::FEDomain, a, a_old, Δt)
         element_routine!(Ke, re, material, cv, cell, ae, ae_old, Δt, sdh)
         assemble!(assembler, celldofs(cell), Ke, re)
     end
-end
+end;
 
 function get_grid()
     # Import grid from abaqus mesh
@@ -388,7 +370,7 @@ function get_grid()
     addcellset!(grid, &quot;porous3&quot;, intersect(getcellset(grid, &quot;porous&quot;), getcellset(grid, &quot;CPS3&quot;)))
     addcellset!(grid, &quot;porous4&quot;, intersect(getcellset(grid, &quot;porous&quot;), getcellset(grid, &quot;CPS4R&quot;)))
     return grid
-end
+end;
 
 function setup_problem(;t_rise=0.1, u_max=-0.1)
 
@@ -453,7 +435,7 @@ function setup_problem(;t_rise=0.1, u_max=-0.1)
     close!(ch)
 
     return dh, ch, domains
-end
+end;
 
 function solve(dh, ch, domains; Δt=0.025, t_total=1.0)
     K = create_sparsity_pattern(dh);
@@ -479,7 +461,7 @@ function solve(dh, ch, domains; Δt=0.025, t_total=1.0)
         end
     end
     vtk_save(pvd);
-end
+end;
 
 dh, ch, domains = setup_problem()
-solve(dh, ch, domains)</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../topology_optimization/">« Topology optimization</a><a class="docs-footer-nextpage" href="../../topics/">Topic guide overview »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Sunday 2 July 2023 07:40">Sunday 2 July 2023</span>. Using Julia version 1.9.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+solve(dh, ch, domains);</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../topology_optimization/">« Topology optimization</a><a class="docs-footer-nextpage" href="../../topics/">Topic guide overview »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Sunday 2 July 2023 12:14">Sunday 2 July 2023</span>. Using Julia version 1.9.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

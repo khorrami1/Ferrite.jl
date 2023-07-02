@@ -10,7 +10,7 @@ function Elastic(;E=20.e3, ν=0.3)
     I4vol = I2⊗I2
     I4dev = minorsymmetric(otimesu(I2,I2)) - I4vol / 3
     return Elastic(2G*I4dev + K*I4vol)
-end
+end;
 
 function element_routine!(Ke, re, material::Elastic, cv, cell, a, args...)
     reinit!(cv, cell)
@@ -29,7 +29,7 @@ function element_routine!(Ke, re, material::Elastic, cv, cell, a, args...)
             end
         end
     end
-end
+end;
 
 struct PoroElastic{T}
     elastic::Elastic{T} ## Skeleton stiffness
@@ -38,7 +38,7 @@ struct PoroElastic{T}
     α::T     ## Biot's coefficient       [-]
     β::T     ## Liquid compressibility   [1/MPa]
 end
-PoroElastic(;elastic, k, ϕ, α, β) = PoroElastic(elastic, k, ϕ, α, β)
+PoroElastic(;elastic, k, ϕ, α, β) = PoroElastic(elastic, k, ϕ, α, β);
 
 function element_routine!(Ke, re, m::PoroElastic, cvs::Tuple, cell, a, a_old, Δt, sdh)
     # Setup cellvalues and give easier names
@@ -90,20 +90,20 @@ function element_routine!(Ke, re, m::PoroElastic, cvs::Tuple, cell, a, a_old, Δ
             end
         end
     end
-end
+end;
 
 struct FEDomain{M,CV,SDH<:SubDofHandler}
     material::M
     cellvalues::CV
     sdh::SDH
-end
+end;
 
 function doassemble!(K, r, domains::Vector{<:FEDomain}, a, a_old, Δt)
     assembler = start_assemble(K, r)
     for domain in domains
         doassemble!(assembler, domain, a, a_old, Δt)
     end
-end
+end;
 
 function doassemble!(assembler, domain::FEDomain, a, a_old, Δt)
     material = domain.material
@@ -123,7 +123,7 @@ function doassemble!(assembler, domain::FEDomain, a, a_old, Δt)
         element_routine!(Ke, re, material, cv, cell, ae, ae_old, Δt, sdh)
         assemble!(assembler, celldofs(cell), Ke, re)
     end
-end
+end;
 
 function get_grid()
     # Import grid from abaqus mesh
@@ -135,7 +135,7 @@ function get_grid()
     addcellset!(grid, "porous3", intersect(getcellset(grid, "porous"), getcellset(grid, "CPS3")))
     addcellset!(grid, "porous4", intersect(getcellset(grid, "porous"), getcellset(grid, "CPS4R")))
     return grid
-end
+end;
 
 function setup_problem(;t_rise=0.1, u_max=-0.1)
 
@@ -200,7 +200,7 @@ function setup_problem(;t_rise=0.1, u_max=-0.1)
     close!(ch)
 
     return dh, ch, domains
-end
+end;
 
 function solve(dh, ch, domains; Δt=0.025, t_total=1.0)
     K = create_sparsity_pattern(dh);
@@ -226,10 +226,10 @@ function solve(dh, ch, domains; Δt=0.025, t_total=1.0)
         end
     end
     vtk_save(pvd);
-end
+end;
 
 dh, ch, domains = setup_problem()
-solve(dh, ch, domains)
+solve(dh, ch, domains);
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 
