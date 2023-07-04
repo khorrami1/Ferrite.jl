@@ -169,7 +169,6 @@ end
 
 # This parametrization gives the spot pattern shown in the gif above.
 gray_scott_sphere(0.06, 0.062, 10.0, 32000.0)
-gray_scott_sphere(0.06, 0.062, 10.0, 20.0)
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 

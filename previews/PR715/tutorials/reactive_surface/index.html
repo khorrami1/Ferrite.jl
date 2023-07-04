@@ -164,10 +164,27 @@ end</code></pre><pre class="documenter-example-output"><code class="nohighlight 
 end
 
 # This parametrization gives the spot pattern shown in the gif above.
-gray_scott_sphere(0.06, 0.062, 10.0, 32000.0)
-gray_scott_sphere(0.06, 0.062, 10.0, 20.0)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{String}:
+gray_scott_sphere(0.06, 0.062, 10.0, 32000.0)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">322-element Vector{String}:
  &quot;reactive-surface.pvd&quot;
- &quot;reactive-surface-0.0.vtu&quot;</code></pre><h2 id="reactive_surface-plain-program"><a class="docs-heading-anchor" href="#reactive_surface-plain-program">Plain program</a><a id="reactive_surface-plain-program-1"></a><a class="docs-heading-anchor-permalink" href="#reactive_surface-plain-program" title="Permalink"></a></h2><p>Here follows a version of the program without any comments. The file is also available here: <a href="../reactive_surface.jl"><code>reactive_surface.jl</code></a>.</p><pre><code class="language-julia hljs">using Ferrite
+ &quot;reactive-surface-0.0.vtu&quot;
+ &quot;reactive-surface-100.0.vtu&quot;
+ &quot;reactive-surface-200.0.vtu&quot;
+ &quot;reactive-surface-300.0.vtu&quot;
+ &quot;reactive-surface-400.0.vtu&quot;
+ &quot;reactive-surface-500.0.vtu&quot;
+ &quot;reactive-surface-600.0.vtu&quot;
+ &quot;reactive-surface-700.0.vtu&quot;
+ &quot;reactive-surface-800.0.vtu&quot;
+ ⋮
+ &quot;reactive-surface-31200.0.vtu&quot;
+ &quot;reactive-surface-31300.0.vtu&quot;
+ &quot;reactive-surface-31400.0.vtu&quot;
+ &quot;reactive-surface-31500.0.vtu&quot;
+ &quot;reactive-surface-31600.0.vtu&quot;
+ &quot;reactive-surface-31700.0.vtu&quot;
+ &quot;reactive-surface-31800.0.vtu&quot;
+ &quot;reactive-surface-31900.0.vtu&quot;
+ &quot;reactive-surface-32000.0.vtu&quot;</code></pre><h2 id="reactive_surface-plain-program"><a class="docs-heading-anchor" href="#reactive_surface-plain-program">Plain program</a><a id="reactive_surface-plain-program-1"></a><a class="docs-heading-anchor-permalink" href="#reactive_surface-plain-program" title="Permalink"></a></h2><p>Here follows a version of the program without any comments. The file is also available here: <a href="../reactive_surface.jl"><code>reactive_surface.jl</code></a>.</p><pre><code class="language-julia hljs">using Ferrite
 using BlockArrays, SparseArrays, LinearAlgebra
 
 function assemble_element_mass!(Me::Matrix, cellvalues::CellValues)
@@ -337,5 +354,4 @@ function gray_scott_sphere(F, k, Δt, T)
 end
 
 # This parametrization gives the spot pattern shown in the gif above.
-gray_scott_sphere(0.06, 0.062, 10.0, 32000.0)
-gray_scott_sphere(0.06, 0.062, 10.0, 20.0)</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../ns_vs_diffeq/">« Incompressible Navier-Stokes equations via DifferentialEquations.jl</a><a class="docs-footer-nextpage" href="../linear_shell/">Linear shell »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Tuesday 4 July 2023 18:27">Tuesday 4 July 2023</span>. Using Julia version 1.9.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+gray_scott_sphere(0.06, 0.062, 10.0, 32000.0)</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../ns_vs_diffeq/">« Incompressible Navier-Stokes equations via DifferentialEquations.jl</a><a class="docs-footer-nextpage" href="../linear_shell/">Linear shell »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Tuesday 4 July 2023 18:34">Tuesday 4 July 2023</span>. Using Julia version 1.9.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
