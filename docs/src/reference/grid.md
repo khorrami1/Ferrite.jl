@@ -36,8 +36,9 @@ getedgesets
 getvertexset
 getvertexsets
 transform!
-get_cell_coordinates
-get_cell_coordinates!
+getcoordinates
+getcoordinates!
+Ferrite.get_node_coordinate
 ```
 
 ### Topology
