@@ -13,6 +13,24 @@ function create_cook_grid(nx, ny)
     return grid
 end;
 
+function create_values(interpolation_u, interpolation_p)
+    # quadrature rules
+    qr      = QuadratureRule{RefTriangle}(3)
+    face_qr = FaceQuadratureRule{RefTriangle}(3)
+
+    # cell and facevalues for u
+    cellvalues_u = CellValues(qr, interpolation_u)
+    facevalues_u = FaceValues(face_qr, interpolation_u)
+
+    # cellvalues for p
+    cellvalues_p = CellValues(qr, interpolation_p)
+
+    # Combine the cellvalues into MultiCellValues
+    cellvalues = MultiCellValues(;u=cellvalues_u, p=cellvalues_p)
+
+    return cellvalues, facevalues_u
+end;
+
 function create_dofhandler(grid, ipu, ipp)
     dh = DofHandler(grid)
     add!(dh, :u, ipu) # displacement
@@ -138,12 +156,8 @@ function solve(ν, interpolation_u, interpolation_p)
     dh = create_dofhandler(grid, interpolation_u, interpolation_p)
     dbc = create_bc(dh)
 
-    # facevalues (for Neumann boundary conditions)
-    interpolation_geom = Lagrange{RefTriangle,1}()^2
-    facevalues_u = FaceValues(FaceQuadratureRule{RefTriangle}(3), interpolation_u, interpolation_geom)
-
     # cellvalues
-    cellvalues = MultiCellValues(dh; qr=3)
+    cellvalues, facevalues_u = create_values(interpolation_u, interpolation_p)
 
     # assembly and solve
     K = create_sparsity_pattern(dh);
