@@ -37,9 +37,9 @@ points = [Vec((x, 0.75)) for x in range(-1.0, 1.0, length=101)];
 
 ph = PointEvalHandler(grid, points);
 
-q_points = get_point_values(ph, projector, q_projected);
+q_points = evaluate_at_points(ph, projector, q_projected);
 
-u_points = Ferrite.get_point_values(ph, dh, u, :u);
+u_points = evaluate_at_points(ph, dh, u, :u);
 
 import Plots
 
