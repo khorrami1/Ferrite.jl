@@ -84,8 +84,8 @@ function LandauModel(α, G, gridsize, left::Vec{DIM, T}, right::Vec{DIM, T}, elp
 end
 
 function save_landau(path, model, dofs=model.dofs)
-    VTKStream(path, model.dofhandler.grid) do vtks
-        write_solution(vtks, model.dofhandler, dofs)
+    Ferrite.VTKFile(path, model.dofhandler.grid) do vtk
+        write_solution(vtk, model.dofhandler, dofs)
     end
 end
 

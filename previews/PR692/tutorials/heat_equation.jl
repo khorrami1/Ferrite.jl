@@ -78,8 +78,8 @@ K, f = assemble_global(cellvalues, K, dh);
 apply!(K, f, ch)
 u = K \ f;
 
-VTKStream("heat_equation", grid) do vtks
-    write_solution(vtks, dh, u)
+Ferrite.VTKFile("heat_equation", grid) do vtk
+    write_solution(vtk, dh, u)
 end
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl

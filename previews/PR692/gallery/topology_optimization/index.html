@@ -332,16 +332,16 @@ end</code></pre><p>We put everything together in the main function. Here the use
             i = @sprintf(&quot;%3.3i&quot;, it)
             filename_it = string(filename, &quot;_&quot;, i)
 
-            VTKStream(filename_it, grid) do vtks
-                write_celldata(vtks, grid, χ, &quot;density&quot;)
+            Ferrite.VTKFile(filename_it, grid) do vtk
+                write_celldata(vtk, grid, χ, &quot;density&quot;)
             end
         end
     end
 
     # export converged results
     if(!output)
-        VTKStream(filename, grid) do vtks
-            write_celldata(vtks, grid, χ, &quot;density&quot;)
+        Ferrite.VTKFile(filename, grid) do vtk
+            write_celldata(vtk, grid, χ, &quot;density&quot;)
         end
     end
     @printf &quot;Rel. stiffness: %.4f \n&quot; compliance^(-1)/compliance_0^(-1)
@@ -713,16 +713,16 @@ function topopt(ra,ρ,n,filename; output=:false)
             i = @sprintf(&quot;%3.3i&quot;, it)
             filename_it = string(filename, &quot;_&quot;, i)
 
-            VTKStream(filename_it, grid) do vtks
-                write_celldata(vtks, grid, χ, &quot;density&quot;)
+            Ferrite.VTKFile(filename_it, grid) do vtk
+                write_celldata(vtk, grid, χ, &quot;density&quot;)
             end
         end
     end
 
     # export converged results
     if(!output)
-        VTKStream(filename, grid) do vtks
-            write_celldata(vtks, grid, χ, &quot;density&quot;)
+        Ferrite.VTKFile(filename, grid) do vtk
+            write_celldata(vtk, grid, χ, &quot;density&quot;)
         end
     end
     @printf &quot;Rel. stiffness: %.4f \n&quot; compliance^(-1)/compliance_0^(-1)
@@ -732,4 +732,4 @@ end
 
 topopt(0.02, 0.5, 60, &quot;small_radius&quot;; output=:false);
 topopt(0.03, 0.5, 60, &quot;large_radius&quot;; output=:false);
-##topopt(0.02, 0.5, 60, &quot;topopt_animation&quot;; output=:true); # can be used to create animations</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Wednesday 19 July 2023 07:34">Wednesday 19 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+##topopt(0.02, 0.5, 60, &quot;topopt_animation&quot;; output=:true); # can be used to create animations</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Wednesday 19 July 2023 14:14">Wednesday 19 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

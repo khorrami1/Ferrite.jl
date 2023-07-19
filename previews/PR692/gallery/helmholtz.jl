@@ -102,9 +102,9 @@ K, f = doassemble(cellvalues, facevalues, K, dh);
 apply!(K, f, dbcs)
 u = Symmetric(K) \ f;
 
-vtks = VTKStream("helmholtz", grid)
-write_solution(vtks, dh, u)
-close(vtks)
+vtk = Ferrite.VTKFile("helmholtz", grid)
+write_solution(vtk, dh, u)
+close(vtk)
 println("Helmholtz successful")
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
