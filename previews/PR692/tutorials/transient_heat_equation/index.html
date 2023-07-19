@@ -79,12 +79,10 @@ M = doassemble_M!(M, cellvalues, dh)
 A = (Δt .* K) + M;</code></pre><p>Now, we need to save all boundary condition related values of the unaltered system matrix <code>A</code>, which is done by <code>get_rhs_data</code>. The function returns a <code>RHSData</code> struct, which contains all needed information to apply the boundary conditions solely on the right-hand-side vector of the problem.</p><pre><code class="language-julia hljs">rhsdata = get_rhs_data(ch, A);</code></pre><p>We set the values at initial time step, denoted by uₙ, to a bubble-shape described by <span>$(x_1^2-1)(x_2^2-1)$</span>, such that it is zero at the boundaries and the maximum temperature in the center.</p><pre><code class="language-julia hljs">uₙ = zeros(length(f));
 apply_analytical!(uₙ, dh, :u, x -&gt; (x[1]^2 - 1) * (x[2]^2 - 1) * max_temp);</code></pre><p>Here, we apply <strong>once</strong> the boundary conditions to the system matrix <code>A</code>.</p><pre><code class="language-julia hljs">apply!(A, ch);</code></pre><p>To store the solution, we initialize a <code>paraview_collection</code> (.pvd) file.</p><pre><code class="language-julia hljs">pvd = paraview_collection(&quot;transient-heat.pvd&quot;);
 t = 0
-vtk_grid(&quot;transient-heat-$t&quot;, dh) do vtk
-    vtk_point_data(vtk, dh, uₙ)
-    vtk_save(vtk)
-    pvd[t] = vtk
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1-element Vector{String}:
- &quot;transient-heat-0.vtu&quot;</code></pre><p>At this point everything is set up and we can finally approach the time loop.</p><pre><code class="language-julia hljs">for t in Δt:Δt:T
+VTKStream(&quot;transient-heat-$t&quot;, grid) do vtks
+    write_solution(vtks, dh, uₙ)
+    pvd[t] = vtks
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">VTKStream for the closed file &quot;transient-heat-0.vtu&quot;.</code></pre><p>At this point everything is set up and we can finally approach the time loop.</p><pre><code class="language-julia hljs">for t in Δt:Δt:T
     #First of all, we need to update the Dirichlet boundary condition values.
     update!(ch, t)
 
@@ -96,10 +94,9 @@ end</code></pre><pre class="documenter-example-output"><code class="nohighlight 
     #Finally, we can solve the time step and save the solution afterwards.
     u = A \ b
 
-    vtk_grid(&quot;transient-heat-$t&quot;, dh) do vtk
-        vtk_point_data(vtk, dh, u)
-        vtk_save(vtk)
-        pvd[t] = vtk
+    VTKStream(&quot;transient-heat-$t&quot;, grid) do vtks
+        write_solution(vtks, dh, u)
+        pvd[t] = vtks
     end
     #At the end of the time loop, we set the previous solution to the current one and go to the next time step.
     uₙ .= u
@@ -213,10 +210,9 @@ apply!(A, ch);
 
 pvd = paraview_collection(&quot;transient-heat.pvd&quot;);
 t = 0
-vtk_grid(&quot;transient-heat-$t&quot;, dh) do vtk
-    vtk_point_data(vtk, dh, uₙ)
-    vtk_save(vtk)
-    pvd[t] = vtk
+VTKStream(&quot;transient-heat-$t&quot;, grid) do vtks
+    write_solution(vtks, dh, uₙ)
+    pvd[t] = vtks
 end
 
 for t in Δt:Δt:T
@@ -231,13 +227,12 @@ for t in Δt:Δt:T
     #Finally, we can solve the time step and save the solution afterwards.
     u = A \ b
 
-    vtk_grid(&quot;transient-heat-$t&quot;, dh) do vtk
-        vtk_point_data(vtk, dh, u)
-        vtk_save(vtk)
-        pvd[t] = vtk
+    VTKStream(&quot;transient-heat-$t&quot;, grid) do vtks
+        write_solution(vtks, dh, u)
+        pvd[t] = vtks
     end
     #At the end of the time loop, we set the previous solution to the current one and go to the next time step.
     uₙ .= u
 end
 
-vtk_save(pvd);</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../plasticity/">« Von Mises plasticity</a><a class="docs-footer-nextpage" href="../computational_homogenization/">Computational homogenization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Tuesday 18 July 2023 17:41">Tuesday 18 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+vtk_save(pvd);</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../plasticity/">« Von Mises plasticity</a><a class="docs-footer-nextpage" href="../computational_homogenization/">Computational homogenization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Wednesday 19 July 2023 07:34">Wednesday 19 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

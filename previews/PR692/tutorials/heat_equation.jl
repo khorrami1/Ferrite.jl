@@ -78,8 +78,8 @@ K, f = assemble_global(cellvalues, K, dh);
 apply!(K, f, ch)
 u = K \ f;
 
-vtk_grid("heat_equation", dh) do vtk
-    vtk_point_data(vtk, dh, u)
+VTKStream("heat_equation", grid) do vtks
+    write_solution(vtks, dh, u)
 end
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl

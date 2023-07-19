@@ -152,8 +152,8 @@ end;</code></pre><p>Now we have constructed all the necessary components, we jus
     # export
     filename = &quot;cook_&quot; * (isa(interpolation_u, Lagrange{RefTriangle,1}) ? &quot;linear&quot; : &quot;quadratic&quot;) *
                          &quot;_linear&quot;
-    vtk_grid(filename, dh) do vtkfile
-        vtk_point_data(vtkfile, dh, u)
+    VTKStream(filename, grid) do vtks
+        write_solution(vtks, dh, u)
     end
     return u
 end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">solve (generic function with 1 method)</code></pre><p>We now define the interpolation for displacement and pressure. We use (scalar) Lagrange interpolation as a basis for both, and for the displacement, which is a vector, we vectorize it to 2 dimensions such that we obtain vector shape functions (and 2nd order tensors for the gradients).</p><pre><code class="language-julia hljs">linear_p    = Lagrange{RefTriangle,1}()
@@ -328,8 +328,8 @@ function solve(ν, interpolation_u, interpolation_p)
     # export
     filename = &quot;cook_&quot; * (isa(interpolation_u, Lagrange{RefTriangle,1}) ? &quot;linear&quot; : &quot;quadratic&quot;) *
                          &quot;_linear&quot;
-    vtk_grid(filename, dh) do vtkfile
-        vtk_point_data(vtkfile, dh, u)
+    VTKStream(filename, grid) do vtks
+        write_solution(vtks, dh, u)
     end
     return u
 end
@@ -339,4 +339,4 @@ linear_u    = Lagrange{RefTriangle,1}()^2
 quadratic_u = Lagrange{RefTriangle,2}()^2
 
 u1 = solve(0.4999999, linear_u,    linear_p)
-u2 = solve(0.4999999, quadratic_u, linear_p);</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../linear_elasticity/">« Linear elasticity</a><a class="docs-footer-nextpage" href="../hyperelasticity/">Hyperelasticity »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Tuesday 18 July 2023 17:41">Tuesday 18 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+u2 = solve(0.4999999, quadratic_u, linear_p);</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../linear_elasticity/">« Linear elasticity</a><a class="docs-footer-nextpage" href="../hyperelasticity/">Hyperelasticity »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.28.0-DEV on <span class="colophon-date" title="Wednesday 19 July 2023 07:34">Wednesday 19 July 2023</span>. Using Julia version 1.9.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

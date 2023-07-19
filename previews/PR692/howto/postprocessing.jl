@@ -29,8 +29,8 @@ projector = L2Projector(ip, grid);
 
 q_projected = project(projector, q_gp, qr);
 
-vtk_grid("heat_equation_flux", grid) do vtk
-    vtk_point_data(vtk, projector, q_projected, "q")
+VTKStream("heat_equation_flux", grid) do vtks
+    write_projected(vtks, projector, q_projected, "q")
 end;
 
 points = [Vec((x, 0.75)) for x in range(-1.0, 1.0, length=101)];
