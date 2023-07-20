@@ -102,7 +102,7 @@ K, f = doassemble(cellvalues, facevalues, K, dh);
 apply!(K, f, dbcs)
 u = Symmetric(K) \ f;
 
-vtk = Ferrite.VTKFile("helmholtz", grid)
+vtk = VTKFile("helmholtz", grid)
 write_solution(vtk, dh, u)
 close(vtk)
 println("Helmholtz successful")

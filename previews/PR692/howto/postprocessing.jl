@@ -29,7 +29,7 @@ projector = L2Projector(ip, grid);
 
 q_projected = project(projector, q_gp, qr);
 
-Ferrite.VTKFile("heat_equation_flux", grid) do vtk
+VTKFile("heat_equation_flux", grid) do vtk
     write_projection(vtk, projector, q_projected, "q")
 end;
 

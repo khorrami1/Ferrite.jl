@@ -78,7 +78,7 @@ K, f = assemble_global(cellvalues, K, dh);
 apply!(K, f, ch)
 u = K \ f;
 
-Ferrite.VTKFile("heat_equation", grid) do vtk
+VTKFile("heat_equation", grid) do vtk
     write_solution(vtk, dh, u)
 end
 

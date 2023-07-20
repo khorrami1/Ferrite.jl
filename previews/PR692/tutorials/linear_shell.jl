@@ -74,7 +74,7 @@ end
 apply!(K, f, ch)
 a = K\f
 
-Ferrite.VTKFile("linear_shell", grid) do vtk
+VTKFile("linear_shell", grid) do vtk
     write_solution(vtk, dh, a)
 end
 
