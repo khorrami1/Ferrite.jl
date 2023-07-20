@@ -111,10 +111,8 @@ function create_bc(dh, grid)
     return dbcs
 end;
 
-function doassemble(cellvalues::CellValues,
-                    facevalues::FaceValues, K::SparseMatrixCSC, grid::Grid,
-                    dh::DofHandler, material::J2Plasticity, u, states, states_old, t)
-    r = zeros(ndofs(dh))
+function doassemble!(K::SparseMatrixCSC, r::Vector, cellvalues::CellValues, dh::DofHandler,
+                     material::J2Plasticity, u, states, states_old)
     assembler = start_assemble(K, r)
     nu = getnbasefunctions(cellvalues)
     re = zeros(nu)     # element residual vector
@@ -127,15 +125,14 @@ function doassemble(cellvalues::CellValues,
         ue = u[eldofs]
         state = @view states[:, i]
         state_old = @view states_old[:, i]
-        assemble_cell!(ke, re, cell, cellvalues, facevalues, grid, material,
-                       ue, state, state_old, t)
+        assemble_cell!(ke, re, cell, cellvalues, material, ue, state, state_old)
         assemble!(assembler, eldofs, re, ke)
     end
     return K, r
 end
 
-function assemble_cell!(Ke, re, cell, cellvalues, facevalues, grid, material,
-                        ue, state, state_old, t)
+function assemble_cell!(Ke, re, cell, cellvalues, material,
+                        ue, state, state_old)
     n_basefuncs = getnbasefunctions(cellvalues)
     reinit!(cellvalues, cell)
 
@@ -155,21 +152,6 @@ function assemble_cell!(Ke, re, cell, cellvalues, facevalues, grid, material,
         end
     end
     symmetrize_lower!(Ke)
-
-    # Add traction as a negative contribution to the element residual `re`:
-    for face in 1:nfaces(cell)
-        if onboundary(cell, face) && (cellid(cell), face) ∈ getfaceset(grid, "right")
-            reinit!(facevalues, cell, face)
-            for q_point in 1:getnquadpoints(facevalues)
-                dΓ = getdetJdV(facevalues, q_point)
-                for i in 1:n_basefuncs
-                    δu = shape_value(facevalues, q_point, i)
-                    re[i] -= (δu ⋅ t) * dΓ
-                end
-            end
-        end
-    end
-
 end
 
 function symmetrize_lower!(K)
@@ -179,6 +161,25 @@ function symmetrize_lower!(K)
         end
     end
 end;
+
+function doassemble_neumann!(r, dh, faceset, facevalues, t)
+    n_basefuncs = getnbasefunctions(facevalues)
+    re = zeros(n_basefuncs)                      # element residual vector
+    for fc in FaceIterator(dh, faceset)
+        # Add traction as a negative contribution to the element residual `re`:
+        reinit!(facevalues, fc)
+        fill!(re, 0)
+        for q_point in 1:getnquadpoints(facevalues)
+            dΓ = getdetJdV(facevalues, q_point)
+            for i in 1:n_basefuncs
+                δu = shape_value(facevalues, q_point, i)
+                re[i] -= (δu ⋅ t) * dΓ
+            end
+        end
+        assemble!(r, celldofs(fc), re)
+    end
+    return r
+end
 
 function solve()
     # Define material parameters
@@ -239,8 +240,10 @@ function solve()
                 error("Reached maximum Newton iterations, aborting")
                 break
             end
-            K, r = doassemble(cellvalues, facevalues, K, grid, dh, material, u,
-                             states, states_old, traction);
+            # Tangent and residual contribution from the cells (volume integral)
+            doassemble!(K, r, cellvalues, dh, material, u, states, states_old);
+            # Residual contribution from the Neumann boundary (surface integral)
+            doassemble_neumann!(r, dh, getfaceset(grid, "right"), facevalues, traction)
             norm_r = norm(r[Ferrite.free_dofs(dbcs)])
 
             print("Iteration: $newton_itr \tresidual: $(@sprintf("%.8f", norm_r))\n")
@@ -256,7 +259,7 @@ function solve()
         # Update the old states with the converged values for next timestep
         states_old .= states
 
-        u_max[timestep] = maximum(abs.(u)) # maximum displacement in current timestep
+        u_max[timestep] = maximum(abs, u) # maximum displacement in current timestep
     end
 
     # ## Postprocessing
