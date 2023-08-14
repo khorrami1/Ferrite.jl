@@ -146,6 +146,7 @@
 using Ferrite, FerriteGmsh, Gmsh, Tensors, LinearAlgebra, SparseArrays
 using Test #src
 
+# Temp fix for FerriteGmsh
 function FerriteGmsh.tofacesets(boundarydict::Dict{String,Vector}, elements::Vector{<:Ferrite.AbstractCell})
     faces = Ferrite.facets.(elements)
     facesets = Dict{String,Set{FaceIndex}}()
@@ -224,6 +225,7 @@ function setup_grid(h=0.05)
     ## Finalize the Gmsh library
     Gmsh.finalize()
 
+    # Temp fix for FerriteGmsh
     for setname in ["Γ1", "Γ2", "Γ3", "Γ4"]
         faceset = grid.facesets[setname]
         edgeset = Set([EdgeIndex(f[1], f[2]) for f in faceset])

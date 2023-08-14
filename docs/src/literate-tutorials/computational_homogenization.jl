@@ -206,6 +206,9 @@ using FerriteGmsh
 #md     togrid("periodic-rve-coarse.msh") #hide
 #md end                                               #hide
 
+grid = togrid("periodic-rve.msh") #src
+
+# Temp fix for FerriteGmsh
 function FerriteGmsh.tofacesets(boundarydict::Dict{String,Vector}, elements::Vector{<:Ferrite.AbstractCell})
     faces = Ferrite.facets.(elements)
     facesets = Dict{String,Set{FaceIndex}}()
@@ -218,20 +221,6 @@ function FerriteGmsh.tofacesets(boundarydict::Dict{String,Vector}, elements::Vec
     end
     return facesets
 end
-
-#=function FerriteGmsh._add_to_facesettuple!(facesettuple::Set{FaceIndex}, boundaryface::Tuple, faces)
-    for (eleidx, elefaces) in enumerate(faces)
-        if any(issubset.(elefaces, (boundaryface,)))
-            localface = findfirst(x -> issubset(x,boundaryface), elefaces) 
-            push!(facesettuple, FaceIndex(eleidx, localface))
-        end
-    end
-    return facesettuple
-end=#
-
-
-grid = togrid("periodic-rve.msh") #src
-#hot fix
 for setname in ["left", "right", "top", "bottom"]
     faceset = grid.facesets[setname]
     edgeset = Set([EdgeIndex(f[1], f[2]) for f in faceset])
