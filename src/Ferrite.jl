@@ -70,10 +70,6 @@ struct VertexIndex <: BoundaryIndex
     idx::Tuple{Int,Int} # cell and side
 end
 
-struct FacetIndex <: BoundaryIndex
-    idx::Tuple{Int,Int} # cell and side
-end
-
 include("utils.jl")
 
 # Matrix/Vector utilities
