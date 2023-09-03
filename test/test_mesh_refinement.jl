@@ -9,7 +9,7 @@ refineCells = [1, 2]
 
 # Triangle element refinement
 
-function refine_grid_Triangle!(grid::Grid, refineCells::Vector{Int64})
+function refine_grid_Triangle(grid::Grid, refineCells::Vector{Int64})
 
     newNodes = copy(grid.nodes)
     newCells = copy(grid.cells)
@@ -84,14 +84,18 @@ function refine_grid_Triangle!(grid::Grid, refineCells::Vector{Int64})
             id_node3 = addIdNodes[idNode_temp]
         end
 
-        push!(newCells, Triangle((id_node1, id_node2, id_node3)))
+        # push!(newCells, Triangle((id_node1, id_node2, id_node3)))
+        newCells[cellId] = Triangle((id_node1, id_node2, id_node3))
+        push!(newCells, Triangle((id_node1, nodes_cell[1], id_node2)))
+        push!(newCells, Triangle((id_node2, nodes_cell[3], id_node3)))
+        push!(newCells, Triangle((id_node3, nodes_cell[2], id_node1)))
 
     end
 
     return newNodes, newCells, isirregular, addIdNodes, addIdNodesVicinity
 end
 
-newNodes, newCells, isirregular, addIdNodes, addIdNodesVicinity = refine_grid_Triangle!(grid, refineCells)
+newNodes, newCells, isirregular, addIdNodes, addIdNodesVicinity = refine_grid_Triangle(grid, refineCells)
 
 newGrid = Grid(newCells, newNodes)
 newDH = DofHandler(newGrid)
