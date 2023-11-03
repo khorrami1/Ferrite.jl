@@ -5,7 +5,7 @@ using Ferrite, Tensors
 grid = generate_grid(Triangle, (10,10))
 
 # refineCell = Vector{Int}
-refineCells = [1, 2]
+refineCells = [Int64(round(rand()*getncells(grid))) for _ in 1:100]
 
 # Triangle element refinement
 
@@ -104,7 +104,7 @@ close!(newDH)
 
 ch = Ferrite.ConstraintHandler(newDH)
 
-for i in 1:length(addIdNodes)
+for i in eachindex(addIdNodes)
     if isirregular[i]
         # Adding AffineConstraint for the corresponding dofs of the corresponding node
         idNode = addIdNodes[i]
@@ -114,3 +114,5 @@ for i in 1:length(addIdNodes)
         add!(ch, affineConstraint)
     end
 end
+
+vtk_save(vtk_grid("grid_refined", newGrid))
