@@ -29,12 +29,10 @@ else
 end
 
 include("test_utils.jl")
-
-# Unit tests
 include("test_interpolations.jl")
 include("test_cellvalues.jl")
 include("test_facevalues.jl")
-include("test_interfacevalues.jl")
+nclude("test_interfacevalues.jl")
 include("test_quadrules.jl")
 include("test_assemble.jl")
 include("test_dofs.jl")
@@ -51,6 +49,8 @@ include("test_apply_analytical.jl")
 include("test_deprecations.jl")
 HAS_EXTENSIONS && include("blockarrays.jl")
 include("test_examples.jl")
+include("test_p4est.jl")
+include("test_p4est_example.jl")
 @test all(x -> isdefined(Ferrite, x), names(Ferrite))  # Test that all exported symbols are defined
 
 # Integration tests
