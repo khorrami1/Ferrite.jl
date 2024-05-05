@@ -90,13 +90,14 @@ include("FEValues/face_integrals.jl")
 
 # Grid
 include("Grid/grid.jl")
+include("Grid/ncgrid.jl")
 include("Grid/topology.jl")
 include("Grid/utils.jl")
 include("Grid/grid_generators.jl")
 include("Grid/coloring.jl")
 
 # Adaptiviy
-include(joinpath("Adaptivity", "AdaptiveCells.jl"))
+include("Adaptivity/BWG.jl")
 
 # Dofs
 include("Dofs/DofHandler.jl")
