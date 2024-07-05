@@ -1,5 +1,13 @@
 using Ferrite, FerriteGmsh, SparseArrays
-grid = generate_grid(Quadrilateral, (4,4));
+grid = generate_grid(Quadrilateral, (8,8));
+function random_deformation_field(x)
+    if any(x .≈ -1.0) || any(x .≈ 1.0)
+        return x
+    else
+        Vec{2}(x .+ (rand(2).-0.5)*0.15)
+    end
+end
+transform_coordinates!(grid, random_deformation_field)
 grid  = ForestBWG(grid,10)
 
 analytical_solution(x) = atan(2*(norm(x)-0.5)/0.02)
@@ -15,8 +23,8 @@ function assemble_cell!(ke, fe, cellvalues, ue, coords)
         dΩ = getdetJdV(cellvalues, q_point)
         for i in 1:n_basefuncs
             Nᵢ = shape_value(cellvalues, q_point, i)
-            ∇Nᵢ = shape_gradient(cellvalues, q_point, i)# shape_symmetric_gradient(cellvalues, q_point, i)
-            fe[i] += analytical_rhs(x) * Nᵢ * dΩ # add internal force to residual
+            ∇Nᵢ = shape_gradient(cellvalues, q_point, i)
+            fe[i] += analytical_rhs(x) * Nᵢ * dΩ 
             for j in 1:n_basefuncs
                 ∇Nⱼ = shape_gradient(cellvalues, q_point, j)
                 ke[i, j] += ∇Nⱼ ⋅ ∇Nᵢ * dΩ
@@ -34,7 +42,7 @@ function assemble_global!(K, f, a, dh, cellvalues)
     assembler = start_assemble(K, f)
     ## Loop over all cells
     for cell in CellIterator(dh)
-        reinit!(cellvalues, cell) # update spatial derivatives based on element coordinates
+        reinit!(cellvalues, cell) 
         @views ue = a[celldofs(cell)]
         ## Compute element contribution
         coords = getcoordinates(cell)
@@ -45,26 +53,23 @@ function assemble_global!(K, f, a, dh, cellvalues)
     return K, f
 end
 
-function solve(grid, hnodes)
+function solve(grid)
     dim = 2
-    order = 1 # linear interpolation
-    ip = Lagrange{RefQuadrilateral, order}() # vector valued interpolation
-    qr = QuadratureRule{RefQuadrilateral}(2) # 1 quadrature point
+    order = 1 
+    ip = Lagrange{RefQuadrilateral, order}()
+    qr = QuadratureRule{RefQuadrilateral}(2)
     cellvalues = CellValues(qr, ip);
 
     dh = DofHandler(grid)
     add!(dh, :u, ip)
-    dh, vdict, edict, fdict = Ferrite.__close!(dh);
+    close!(dh);
 
     ch = ConstraintHandler(dh)
+    add!(ch, ConformityConstraint(:u))
     add!(ch, Dirichlet(:u, getfaceset(grid, "top"), (x, t) -> 0.0))
     add!(ch, Dirichlet(:u, getfaceset(grid, "right"), (x, t) -> 0.0))
     add!(ch, Dirichlet(:u, getfaceset(grid, "left"), (x, t) -> 0.0))
     add!(ch, Dirichlet(:u, getfaceset(grid, "bottom"), (x, t) -> 0.0))
-    for (hdof,mdof) in hnodes
-        lc = AffineConstraint(vdict[1][hdof],[vdict[1][m] => 0.5 for m in mdof],0.0)
-        add!(ch,lc)
-    end
     close!(ch);
 
     K = create_sparsity_pattern(dh,ch)
@@ -74,18 +79,18 @@ function solve(grid, hnodes)
     apply!(K, f, ch)
     u = K \ f;
     apply!(u,ch)
-    return u,dh,ch,cellvalues,vdict
+    return u,dh,ch,cellvalues
 end
 
 function compute_fluxes(u,dh)
     ip = Lagrange{RefQuadrilateral, 1}()
-    # Normal quadrature points
+    ## Normal quadrature points
     qr = QuadratureRule{RefQuadrilateral}(2)
     cellvalues = CellValues(qr, ip);
-    # Superconvergent point
+    ## Superconvergent point
     qr_sc = QuadratureRule{RefQuadrilateral}(1)
     cellvalues_sc = CellValues(qr_sc, ip);
-    #Buffers
+    ## Buffers
     σ_gp = Vector{Vector{Vec{2,Float64}}}()
     σ_gp_loc = Vector{Vec{2,Float64}}()
     σ_gp_sc = Vector{Vector{Vec{2,Float64}}}()
@@ -122,10 +127,12 @@ function solve_adaptive(initial_grid)
     pvd = paraview_collection("heat_amr.pvd");
     while !finished && i<=10
         @show i
-        transfered_grid, hnodes = Ferrite.creategrid(grid)
-        u,dh,ch,cv,vdict = solve(transfered_grid,hnodes)
+        transfered_grid = Ferrite.creategrid(grid)
+        vtk_grid("heat_amr-grid_$i", transfered_grid) do vtk
+        end
+        u,dh,ch,cv = solve(transfered_grid)
         σ_gp, σ_gp_sc = compute_fluxes(u,dh)
-        projector = L2Projector(Lagrange{RefQuadrilateral, 1}(), transfered_grid; hnodes=hnodes)
+        projector = L2Projector(Lagrange{RefQuadrilateral, 1}(), transfered_grid)
         σ_dof = project(projector, σ_gp, QuadratureRule{RefQuadrilateral}(2))
         cells_to_refine = Int[]
         error_arr = Float64[]
@@ -152,10 +159,10 @@ function solve_adaptive(initial_grid)
             vtk_cell_data(vtk, error_arr, "error")
             pvd[i] = vtk
         end
-        Ferrite.refine!(grid,cells_to_refine)
-        transfered_grid, hnodes = Ferrite.creategrid(grid)
+
+        Ferrite.refine!(grid, cells_to_refine)
         Ferrite.balanceforest!(grid)
-        transfered_grid, hnodes = Ferrite.creategrid(grid)
+
         i += 1
         if isempty(cells_to_refine)
             finished = true

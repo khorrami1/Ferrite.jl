@@ -106,8 +106,6 @@ export
     generate_grid,
 # AdaptiveGrid
     ForestBWG,
-    OctreeBWG,
-    OctantBWG, 
 
 # Grid coloring
     create_coloring,
@@ -138,6 +136,7 @@ export
     collect_periodic_faces!,
     PeriodicFacePair,
     AffineConstraint,
+    ConformityConstraint,
     update!,
     apply!,
     apply_rhs!,
