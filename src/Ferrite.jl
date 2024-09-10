@@ -140,9 +140,6 @@ include("Grid/utils.jl")
 include("Grid/grid_generators.jl")
 include("Grid/coloring.jl")
 
-# Adaptiviy
-include(joinpath("Adaptivity", "AdaptiveCells.jl"))
-
 # Dofs
 include("Dofs/DofHandler.jl")
 include("Dofs/ConstraintHandler.jl")
@@ -168,5 +165,9 @@ include("PointEvalHandler.jl")
 # Other
 include("deprecations.jl")
 include("docs.jl")
+
+# Adaptiviy
+include("Adaptivity/AMR.jl")
+using .AMR
 
 end # module

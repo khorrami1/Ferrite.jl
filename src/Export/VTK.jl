@@ -110,6 +110,18 @@ nodes_to_vtkorder(cell::QuadraticHexahedron) = [
     cell.nodes[27], # interior
 ]
 
+"""
+    vtk_grid(filename::AbstractString, grid::Grid; kwargs...)
+    vtk_grid(filename::AbstractString, dh::DofHandler; kwargs...)
+
+Create a unstructured VTK grid from `grid` (alternatively from the `grid` stored in `dh`). 
+Return a `DatasetFile` that data can be appended to, see 
+[`vtk_point_data`](@ref) and [`vtk_cell_data`](@ref).
+The keyword arguments are forwarded to `WriteVTK.vtk_grid`, see 
+[Data Formatting Options](https://juliavtk.github.io/WriteVTK.jl/stable/grids/syntax/#Data-formatting-options)
+"""
+function WriteVTK.vtk_grid(filename::AbstractString, grid::AbstractGrid{dim}; kwargs...) where {dim}
+    cls = MeshCell[]
 function create_vtk_griddata(grid::Grid{dim,C,T}) where {dim,C,T}
     cls = WriteVTK.MeshCell[]
     for cell in getcells(grid)
@@ -166,6 +178,7 @@ function component_names(::Type{S}) where S
     return names
 end
 
+function vtk_nodeset(vtk::WriteVTK.DatasetFile, grid::AbstractGrid, nodeset::String)
 """
     write_solution(vtk::VTKGridFile, dh::AbstractDofHandler, u::Vector, suffix="")
 

@@ -104,6 +104,19 @@ mutable struct DofHandler{dim,G<:AbstractGrid{dim}} <: AbstractDofHandler
     closed::Bool
     const grid::G
     ndofs::Int
+    # Maps from entity to dofs
+    # `vertexdict` keeps track of the visited vertices. The first dof added to vertex v is
+    # stored in vertexdict[v].
+    vertexdicts::Vector{Vector{Int}}
+    # `edgedict` keeps track of the visited edges, this will only be used for a 3D problem.
+    # An edge is uniquely determined by two global vertices, with global direction going
+    # from low to high vertex number.
+    edgedicts::Vector{Dict{Tuple{Int,Int}, Int}}
+    # `facedict` keeps track of the visited faces. We only need to store the first dof we
+    # add to the face since currently more dofs per face isn't supported. In
+    # 2D a face (i.e. a line) is uniquely determined by 2 vertices, and in 3D a face (i.e. a
+    # surface) is uniquely determined by 3 vertices.
+    facedicts::Vector{Dict{NTuple{dim,Int}, Int}}
 end
 
 """
@@ -383,15 +396,15 @@ function __close!(dh::DofHandler{dim}) where {dim}
             sdh,
             sdhi, # TODO: Store in the SubDofHandler?
             nextdof,
-            vertexdicts,
-            edgedicts,
-            facedicts,
+            dh.vertexdicts,
+            dh.edgedicts,
+            dh.facedicts,
         )
     end
     dh.ndofs = maximum(dh.cell_dofs; init=0)
     dh.closed = true
 
-    return dh, vertexdicts, edgedicts, facedicts
+    return dh, dh.vertexdicts, dh.edgedicts, dh.facedicts
 
 end
 

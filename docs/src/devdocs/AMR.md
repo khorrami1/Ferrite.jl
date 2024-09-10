@@ -1,13 +1,17 @@
-# P4est in Julia with Ferrite
+# AMR
+
+## P4est
 
 All of it is based on these papers:
 
-- [Original p4est paper](https://p4est.github.io/papers/BursteddeWilcoxGhattas11.pdf)
-- [Extension to anisotropic refinement, aka p6est](https://epubs.siam.org/doi/10.1137/140974407)
-- [Extension to RefTet elements and in depth explanations](https://bonndoc.ulb.uni-bonn.de/xmlui/handle/20.500.11811/7661); basically monography about t8code
-- [Lucas sent me this, lots of algorithms I could need](https://epubs.siam.org/doi/epdf/10.1137/140970963)
+- [BWG2011](@citet)
+- [IBWG2015](@citet)
 
-## Important Concepts
+where almost everything is implemented in a serial way from the first paper.
+Only certain specific algorithms of the second paper are implemented and there is a lot of open work to include the iterators of the second paper.
+Look into the issues of Ferrite.jl and search for the AMR tag.
+
+### Important Concepts
 
 One of the most important concepts, where everything is based on, are space filling curves (SFC).
 In particular, [Z-order (also named Morton order, Morton space-filling curves)](https://en.wikipedia.org/wiki/Z-order_curve) are used in p4est.
@@ -17,12 +21,12 @@ The basic idea is that each Octant (in 3D) or quadrant (in 2D) can be encoded by
 - the lower left (front) coordinates `xyz`
 
 Based on them a unique identifier, the morton index, can be computed.
-The good part is, that the mapping from (`l`, `xyz`) -> `mortonidx(l,xyz)` is bijective, meaning we can flip the approach
-and can construct each octant/quadrant solely by the `mortonidx`.
+The mapping from (`l`, `xyz`) -> `mortonidx(l,xyz)` is bijective, meaning we can flip the approach
+and can construct each octant/quadrant solely by the `mortonidx` and a given level `l`.
 
 The current implementation of an octant looks currently like this:
 ```julia
-struct OctantBWG{dim, N, M, T} <: AbstractCell{dim,N,M}
+struct OctantBWG{dim, N, T} <: AbstractCell{RefHypercube{dim}}
     #Refinement level
     l::T
     #x,y,z \in {0,...,2^b} where (0 ≤ l ≤ b)}
@@ -33,13 +37,14 @@ whenever coordinates are considered we follow the z order logic, meaning x befor
 
 The octree is implemented as:
 ```julia
-struct OctreeBWG{dim,N,M,T} <: AbstractAdaptiveCell{dim,N,M}
-    leaves::Vector{OctantBWG{dim,N,M,T}}
-    #maximum refinement level 
+struct OctreeBWG{dim,N,T} <: AbstractAdaptiveCell{RefHypercube{dim}}
+    leaves::Vector{OctantBWG{dim,N,T}}
+    #maximum refinement level
     b::T
     nodes::NTuple{N,Int}
 end
 ```
+
 So, only the leaves of the tree are stored and not any intermediate refinement level.
 The field `b` is the maximum refinement level and is crucial. This parameter determines the size of the octree coordinate system.
 The octree coordinate system is the coordinate system in which the coordinates `xyz` of any `octant::OctantBWG` are described.
@@ -60,12 +65,11 @@ OctantBWG{2,4,4}
 ```
 The size of octants at a specific level can be computed by a simple operation
 ```julia
-#_compute_size(b::Integer, l::Integer) in Ferrite at /home/mkoehler/repos/Ferrite.jl/src/Adaptivity/AdaptiveCells.jl:375
 julia> Ferrite._compute_size(3,0)
 8
 ```
-Now, to fully understand the octree coordinate system we go a level down, i.e. we cut the space in x and y in half.
-This means, that the octrees now of size 4.
+Now, to fully understand the octree coordinate system we go a level down, i.e. we cut the space in $x$ and $y$ in half.
+This means, that the octants are now of size 4.
 ```julia
 julia> Ferrite._compute_size(3,1)
 4
@@ -111,8 +115,9 @@ x-----------x-----------x
 x-----------x-----------x
 ```
 
-The good news: it super cheap to compute octants/quadrants.
-An important aspect of the morton index is that it's only consecutive on **one** level.
+The operation to compute octants/quadrants is cheap, since it is just bitshifting.
+An important aspect of the morton index is that it's only consecutive on **one** level in this specific implementation.
+Note that other implementation exists that incorporate the level integer within the morton identifier and by that have a unique identifier across levels.
 If you have a tree like this below:
 
 ```
@@ -149,30 +154,61 @@ Stacktrace:
 ```
 
 The assertion expresses that it is not possible to construct a morton index 8 octant, since the upper bound of the morton index is 4 on level 1.
-The morton index of the lower right cell is of course 2 on level 1.
+The morton index of the lower right cell is 2 on level 1.
 
+```julia
+julia> o = OctantBWG(2,1,2,3)
+OctantBWG{2,4,4}
+   l = 1
+   xy = 4,0
+```
 
-## Current state and open questions
+### Octant operation
 
-I implemented basic functionality to constructs and operate on octants/octrees.
-In particular, I implemented from the p4est paper the Algorithms 1-7,14,15 (and refinement equivalent).
+There are multiple useful functions to compute information about an octant e.g. parent, childs, etc.
 
-Currently, I'm at fulfilling the `AbstractGrid` interface which has some tricky parts.
-All of the functionality is serial, nothing in terms of distributed is implemented.
+```@docs
+Ferrite.AMR.isancestor
+Ferrite.AMR.morton
+Ferrite.AMR.children
+Ferrite.AMR.vertices
+Ferrite.AMR.edges
+Ferrite.AMR.faces
+Ferrite.AMR.transform_pointBWG
+```
 
-### What we already can do
-- refine octants
-- coarsen octants
-- compute neighbors of octants
-- take a `Grid` and make a `ForestBWG` out of it
+### Intraoctree operation
 
-### Open questions
-- How to count the nodes? 4th paper has an answer to that which is called `LNodes`.
-Algorithm 6.2, which relies on Iterate, Algorithm 5.3. This alrogithm in turn depends on Algorithm 5.2. and 5.1 
+Intraoctree operation stay within one octree and compute octants that are attached in some way to a pivot octant `o`.
+These operations are useful to collect unique entities within a single octree or to compute possible neighbors of `o`.
+[BWG2011](@citet) Algorithm 5, 6, and 7 describe the following intraoctree operations:
 
-### Open TODOs
-- Implement the Iterator of IBWG 2015
-- Coordinate transformation from octree coordinate system to physical coordinate system
-- Octant dispatches that are required to fulfill `<:AbstractCell`
-- Morton index can be computed much faster by methods I commented above the function
-- more efficient `getcells(forest,i)`
+```@docs
+Ferrite.AMR.corner_neighbor
+Ferrite.AMR.edge_neighbor
+Ferrite.AMR.face_neighbor
+Ferrite.AMR.possibleneighbors
+```
+
+### Interoctree operation
+
+Interoctree operation are in contrast to intraoctree operation by computing octant transformations across different octrees.
+Thereby, one needs to account for topological connections between the octrees as well as possible rotations of the octrees.
+[BWG2011](@citet) Algorithm 8, 10, and 12 explain the algorithms that are implemented in the following functions:
+
+```@docs
+Ferrite.AMR.transform_corner
+Ferrite.AMR.transform_edge
+Ferrite.AMR.transform_face
+```
+
+Note that we flipped the input and to expected output logic a bit to the proposed algorithms of the paper.
+However, the original proposed versions are implemented as well in:
+
+```@docs
+Ferrite.AMR.transform_corner_remote
+Ferrite.AMR.transform_edge_remote
+Ferrite.AMR.transform_face_remote
+```
+
+despite being never used in the code base so far.
