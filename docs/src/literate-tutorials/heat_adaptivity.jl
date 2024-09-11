@@ -1,13 +1,13 @@
 using Ferrite, FerriteGmsh, SparseArrays
 grid = generate_grid(Quadrilateral, (8,8));
-function random_deformation_field(x)
-    if any(x .≈ -1.0) || any(x .≈ 1.0)
-        return x
-    else
-        Vec{2}(x .+ (rand(2).-0.5)*0.15)
-    end
-end
-transform_coordinates!(grid, random_deformation_field)
+# function random_deformation_field(x)
+#     if any(x .≈ -1.0) || any(x .≈ 1.0)
+#         return x
+#     else
+#         Vec{2}(x .+ (rand(2).-0.5)*0.15)
+#     end
+# end
+# transform_coordinates!(grid, random_deformation_field)
 grid  = ForestBWG(grid,10)
 
 analytical_solution(x) = atan(2*(norm(x)-0.5)/0.02)
