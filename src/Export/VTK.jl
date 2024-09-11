@@ -120,8 +120,8 @@ Return a `DatasetFile` that data can be appended to, see
 The keyword arguments are forwarded to `WriteVTK.vtk_grid`, see 
 [Data Formatting Options](https://juliavtk.github.io/WriteVTK.jl/stable/grids/syntax/#Data-formatting-options)
 """
-function WriteVTK.vtk_grid(filename::AbstractString, grid::AbstractGrid{dim}; kwargs...) where {dim}
-    cls = MeshCell[]
+# function WriteVTK.vtk_grid(filename::AbstractString, grid::AbstractGrid{dim}; kwargs...) where {dim}
+#     cls = MeshCell[]
 function create_vtk_griddata(grid::Grid{dim,C,T}) where {dim,C,T}
     cls = WriteVTK.MeshCell[]
     for cell in getcells(grid)
@@ -178,7 +178,7 @@ function component_names(::Type{S}) where S
     return names
 end
 
-function vtk_nodeset(vtk::WriteVTK.DatasetFile, grid::AbstractGrid, nodeset::String)
+function vtk_nodeset(vtk::WriteVTK.DatasetFile, grid::AbstractGrid, nodeset::String) end
 """
     write_solution(vtk::VTKGridFile, dh::AbstractDofHandler, u::Vector, suffix="")
 
