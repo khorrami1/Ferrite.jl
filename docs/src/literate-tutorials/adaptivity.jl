@@ -213,11 +213,11 @@ function solve_adaptive(initial_grid)
         end
 
         Ferrite.refine!(grid,cells_to_refine)
-        vtk_grid("unbalanced.vtu", dh) do vtk
+        vtk_grid("Results/unbalanced.vtu", dh) do vtk
         end
 
         Ferrite.balanceforest!(grid)
-        vtk_grid("balanced.vtu", dh) do vtk
+        vtk_grid("Results/balanced.vtu", dh) do vtk
         end
 
         i += 1
