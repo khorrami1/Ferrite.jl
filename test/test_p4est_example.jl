@@ -125,7 +125,7 @@ function setup_poisson_problem(grid, interpolation, interpolation_geo, qr, N)
 
     ch = ConstraintHandler(dh);
     ∂Ω = union(
-        values(Ferrite.getfacesets(grid))...
+        values(Ferrite.getfacetsets(grid))...
     );
     dbc = Dirichlet(:u, ∂Ω, (x, t) -> analytical_solution(x))
     add!(ch, dbc);
@@ -172,7 +172,7 @@ end
         geometry = ConvergenceTestHelper.get_geometry(interpolation)
         interpolation_geo = interpolation
         N = ConvergenceTestHelper.get_N(interpolation)
-        grid = generate_grid(geometry, ntuple(x->10, Ferrite.getdim(geometry)));
+        grid = generate_grid(geometry, ntuple(x->10, Ferrite.getrefdim(geometry)));
         adaptive_grid = ForestBWG(grid,7)
         # ... a suitable quadrature rule ...
         qr_order = ConvergenceTestHelper.get_quadrature_order(interpolation)

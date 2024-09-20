@@ -1,13 +1,15 @@
 module AMR
 
 using .. Ferrite
+import Ferrite: @debug
 using SparseArrays
+using OrderedCollections
 
 include("BWG.jl")
 include("ncgrid.jl")
 include("constraints.jl")
 
-export ForestBWG, 
+export ForestBWG,
        refine!,
        refine_all!,
        coarsen!,

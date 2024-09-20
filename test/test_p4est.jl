@@ -100,22 +100,22 @@ end
 
 @testset "OctantBWG Operations" begin
     o = Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(2,0,0))
-    @test Ferrite.AMR.face_neighbor(o,1,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(0,0,0))
-    @test Ferrite.AMR.face_neighbor(o,2,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(4,0,0))
-    @test Ferrite.AMR.face_neighbor(o,3,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(2,-2,0))
-    @test Ferrite.AMR.face_neighbor(o,4,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(2,2,0))
-    @test Ferrite.AMR.face_neighbor(o,5,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(2,0,-2))
-    @test Ferrite.AMR.face_neighbor(o,6,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(2,0,2))
+    @test Ferrite.AMR.facet_neighbor(o,1,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(0,0,0))
+    @test Ferrite.AMR.facet_neighbor(o,2,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(4,0,0))
+    @test Ferrite.AMR.facet_neighbor(o,3,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(2,-2,0))
+    @test Ferrite.AMR.facet_neighbor(o,4,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(2,2,0))
+    @test Ferrite.AMR.facet_neighbor(o,5,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(2,0,-2))
+    @test Ferrite.AMR.facet_neighbor(o,6,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(2,0,2))
     @test Ferrite.AMR.descendants(o,2) == (Ferrite.AMR.Ferrite.AMR.OctantBWG(2,(2,0,0)), Ferrite.AMR.Ferrite.AMR.OctantBWG(2,(3,1,1)))
     @test Ferrite.AMR.descendants(o,3) == (Ferrite.AMR.Ferrite.AMR.OctantBWG(3,(2,0,0)), Ferrite.AMR.Ferrite.AMR.OctantBWG(3,(5,3,3)))
 
     o = Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(0,0,0))
-    @test Ferrite.AMR.face_neighbor(o,1,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(-2,0,0))
-    @test Ferrite.AMR.face_neighbor(o,2,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(2,0,0))
-    @test Ferrite.AMR.face_neighbor(o,3,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(0,-2,0))
-    @test Ferrite.AMR.face_neighbor(o,4,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(0,2,0))
-    @test Ferrite.AMR.face_neighbor(o,5,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(0,0,-2))
-    @test Ferrite.AMR.face_neighbor(o,6,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(0,0,2))
+    @test Ferrite.AMR.facet_neighbor(o,1,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(-2,0,0))
+    @test Ferrite.AMR.facet_neighbor(o,2,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(2,0,0))
+    @test Ferrite.AMR.facet_neighbor(o,3,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(0,-2,0))
+    @test Ferrite.AMR.facet_neighbor(o,4,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(0,2,0))
+    @test Ferrite.AMR.facet_neighbor(o,5,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(0,0,-2))
+    @test Ferrite.AMR.facet_neighbor(o,6,2) == Ferrite.AMR.Ferrite.AMR.OctantBWG(1,(0,0,2))
     o = Ferrite.AMR.Ferrite.AMR.OctantBWG(0,(0,0,0))
     @test Ferrite.AMR.descendants(o,2) == (Ferrite.AMR.Ferrite.AMR.OctantBWG(2,(0,0,0)), Ferrite.AMR.Ferrite.AMR.OctantBWG(2,(3,3,3)))
     @test Ferrite.AMR.descendants(o,3) == (Ferrite.AMR.Ferrite.AMR.OctantBWG(3,(0,0,0)), Ferrite.AMR.Ferrite.AMR.OctantBWG(3,(7,7,7)))
@@ -187,23 +187,23 @@ end
         @test cell isa Ferrite.AMR.OctreeBWG
         @test cell.leaves[1] == Ferrite.AMR.OctantBWG(2,0,1,cell.b)
     end
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(2,4), adaptive_grid.cells[1].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(1,2), adaptive_grid.cells[1].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,8))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(4,1), adaptive_grid.cells[3].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(3,2), adaptive_grid.cells[4].leaves[1]) == Ferrite.AMR.OctantBWG(0,(-8,0))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(3,3), adaptive_grid.cells[1].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,8))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(1,4), adaptive_grid.cells[3].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,-8))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(4,3), adaptive_grid.cells[2].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(2,2), adaptive_grid.cells[4].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,-8))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(2,4), adaptive_grid.cells[1].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(1,2), adaptive_grid.cells[1].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,8))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(4,1), adaptive_grid.cells[3].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(3,2), adaptive_grid.cells[4].leaves[1]) == Ferrite.AMR.OctantBWG(0,(-8,0))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(3,3), adaptive_grid.cells[1].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,8))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(1,4), adaptive_grid.cells[3].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,-8))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(4,3), adaptive_grid.cells[2].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(2,2), adaptive_grid.cells[4].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,-8))
     o = adaptive_grid.cells[1].leaves[1]
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(1,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(1,4), o) == Ferrite.AMR.OctantBWG(0,(0,8))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(2,4), o) == Ferrite.AMR.OctantBWG(0,(0,8))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(2,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(3,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(3,3), o) == Ferrite.AMR.OctantBWG(0,(0,-8))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(4,1), o) == Ferrite.AMR.OctantBWG(0,(-8,0))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(4,3), o) == Ferrite.AMR.OctantBWG(0,(0,-8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(1,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(1,4), o) == Ferrite.AMR.OctantBWG(0,(0,8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(2,4), o) == Ferrite.AMR.OctantBWG(0,(0,8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(2,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(3,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(3,3), o) == Ferrite.AMR.OctantBWG(0,(0,-8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(4,1), o) == Ferrite.AMR.OctantBWG(0,(-8,0))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(4,3), o) == Ferrite.AMR.OctantBWG(0,(0,-8))
 
     grid_new = Ferrite.AMR.creategrid(adaptive_grid)
     @test length(grid_new.nodes) == 9
@@ -234,14 +234,14 @@ end
         @test cell isa Ferrite.AMR.OctreeBWG
         @test cell.leaves[1] == Ferrite.AMR.OctantBWG(2,0,1,cell.b)
     end
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(2,4), adaptive_grid.cells[1].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(1,2), adaptive_grid.cells[1].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,8))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(4,2), adaptive_grid.cells[3].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(3,2), adaptive_grid.cells[4].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(3,3), adaptive_grid.cells[1].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,8))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(1,4), adaptive_grid.cells[3].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,-8))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(4,4), adaptive_grid.cells[2].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(2,2), adaptive_grid.cells[4].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,8))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(2,4), adaptive_grid.cells[1].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(1,2), adaptive_grid.cells[1].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,8))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(4,2), adaptive_grid.cells[3].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(3,2), adaptive_grid.cells[4].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(3,3), adaptive_grid.cells[1].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,8))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(1,4), adaptive_grid.cells[3].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,-8))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(4,4), adaptive_grid.cells[2].leaves[1]) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(2,2), adaptive_grid.cells[4].leaves[1]) == Ferrite.AMR.OctantBWG(0,(0,8))
 
     #@test Ferrite.AMR.transform_corner(adaptive_grid, VertexIndex(4,4), adaptive_grid.cells[1].leaves[1],false) == Ferrite.AMR.transform_corner_remote(adaptive_grid, VertexIndex(1,4), adaptive_grid.cells[1].leaves[1], false) == Ferrite.AMR.OctantBWG(0,(8,8))
     #@test Ferrite.AMR.transform_corner_remote(adaptive_grid, VertexIndex(3,2), adaptive_grid.cells[1].leaves[1], false) == Ferrite.AMR.transform_corner_remote(adaptive_grid, VertexIndex(2,4), adaptive_grid.cells[1].leaves[1], false) == Ferrite.AMR.OctantBWG(0,(8,-8))
@@ -249,14 +249,14 @@ end
     #@test Ferrite.AMR.transform_corner(adaptive_grid, VertexIndex(3,2), adaptive_grid.cells[1].leaves[1], false) == Ferrite.AMR.transform_corner(adaptive_grid, VertexIndex(2,4), adaptive_grid.cells[1].leaves[1], false) == Ferrite.AMR.OctantBWG(0,(8,-8))
 
     o = adaptive_grid.cells[1].leaves[1]
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(1,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(1,4), o) == Ferrite.AMR.OctantBWG(0,(0,8))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(2,4), o) == Ferrite.AMR.OctantBWG(0,(0,8))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(2,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(3,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(3,3), o) == Ferrite.AMR.OctantBWG(0,(0,-8))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(4,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(4,4), o) == Ferrite.AMR.OctantBWG(0,(0,8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(1,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(1,4), o) == Ferrite.AMR.OctantBWG(0,(0,8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(2,4), o) == Ferrite.AMR.OctantBWG(0,(0,8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(2,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(3,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(3,3), o) == Ferrite.AMR.OctantBWG(0,(0,-8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(4,2), o) == Ferrite.AMR.OctantBWG(0,(8,0))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(4,4), o) == Ferrite.AMR.OctantBWG(0,(0,8))
 
 
     #simple first and second level refinement
@@ -285,10 +285,10 @@ end
     end
     Ferrite.AMR.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[1])
 
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(2,4), adaptive_grid.cells[1].leaves[5]) == Ferrite.AMR.OctantBWG(1,(0,8))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(2,4), adaptive_grid.cells[1].leaves[7]) == Ferrite.AMR.OctantBWG(1,(4,8))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(3,3), adaptive_grid.cells[1].leaves[6]) == Ferrite.AMR.OctantBWG(1,(0,-4))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(3,3), adaptive_grid.cells[1].leaves[7]) == Ferrite.AMR.OctantBWG(1,(4,-4))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(2,4), adaptive_grid.cells[1].leaves[5]) == Ferrite.AMR.OctantBWG(1,(0,8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(2,4), adaptive_grid.cells[1].leaves[7]) == Ferrite.AMR.OctantBWG(1,(4,8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(3,3), adaptive_grid.cells[1].leaves[6]) == Ferrite.AMR.OctantBWG(1,(0,-4))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(3,3), adaptive_grid.cells[1].leaves[7]) == Ferrite.AMR.OctantBWG(1,(4,-4))
 
     grid_new = Ferrite.AMR.creategrid(adaptive_grid)
     @test length(grid_new.nodes) == 19
@@ -322,12 +322,12 @@ end
     @test length(adaptive_grid.cells[1].leaves) == 7
     @test all(getproperty.(adaptive_grid.cells[1].leaves[1:3],:l) .== 1)
 
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(2,4), adaptive_grid.cells[1].leaves[2]) == Ferrite.AMR.OctantBWG(1,(0,8))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(2,4), adaptive_grid.cells[1].leaves[5]) == Ferrite.AMR.OctantBWG(2,(4,8))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(2,4), adaptive_grid.cells[1].leaves[7]) == Ferrite.AMR.OctantBWG(2,(6,8))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(3,3), adaptive_grid.cells[1].leaves[3]) == Ferrite.AMR.OctantBWG(1,(0,-4))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(3,3), adaptive_grid.cells[1].leaves[6]) == Ferrite.AMR.OctantBWG(2,(4,-2))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(3,3), adaptive_grid.cells[1].leaves[7]) == Ferrite.AMR.OctantBWG(2,(6,-2))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(2,4), adaptive_grid.cells[1].leaves[2]) == Ferrite.AMR.OctantBWG(1,(0,8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(2,4), adaptive_grid.cells[1].leaves[5]) == Ferrite.AMR.OctantBWG(2,(4,8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(2,4), adaptive_grid.cells[1].leaves[7]) == Ferrite.AMR.OctantBWG(2,(6,8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(3,3), adaptive_grid.cells[1].leaves[3]) == Ferrite.AMR.OctantBWG(1,(0,-4))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(3,3), adaptive_grid.cells[1].leaves[6]) == Ferrite.AMR.OctantBWG(2,(4,-2))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(3,3), adaptive_grid.cells[1].leaves[7]) == Ferrite.AMR.OctantBWG(2,(6,-2))
 
     grid_new = Ferrite.AMR.creategrid(adaptive_grid)
     @test length(grid_new.nodes) == 19
@@ -375,33 +375,33 @@ end
     grid = generate_grid(Hexahedron,(2,2,2))
     adaptive_grid = ForestBWG(grid,3)
     o = adaptive_grid.cells[1].leaves[1]
-    
-    # faces
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(1,2), o) == Ferrite.AMR.OctantBWG(0,(8,0,0))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(1,2), o) == Ferrite.AMR.OctantBWG(0,(-8,0,0))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(1,4), o) == Ferrite.AMR.OctantBWG(0,(0,8,0))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(1,4), o) == Ferrite.AMR.OctantBWG(0,(0,-8,0))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(1,6), o) == Ferrite.AMR.OctantBWG(0,(0,0,8))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(1,6), o) == Ferrite.AMR.OctantBWG(0,(0,0,-8))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(8,1), o) == Ferrite.AMR.OctantBWG(0,(-8,0,0))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(8,1), o) == Ferrite.AMR.OctantBWG(0,(8,0,0))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(8,3), o) == Ferrite.AMR.OctantBWG(0,(0,-8,0))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(8,3), o) == Ferrite.AMR.OctantBWG(0,(0,8,0))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(8,5), o) == Ferrite.AMR.OctantBWG(0,(0,0,-8))
-    @test Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(8,5), o) == Ferrite.AMR.OctantBWG(0,(0,0,8))
 
-    @test_throws BoundsError Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(1,1), o)
-    @test_throws BoundsError Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(1,1), o)
-    @test_throws BoundsError Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(1,3), o)
-    @test_throws BoundsError Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(1,3), o)
-    @test_throws BoundsError Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(1,5), o)
-    @test_throws BoundsError Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(1,5), o)
-    @test_throws BoundsError Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(8,2), o)
-    @test_throws BoundsError Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(8,2), o)
-    @test_throws BoundsError Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(8,4), o)
-    @test_throws BoundsError Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(8,4), o)
-    @test_throws BoundsError Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(8,6), o)
-    @test_throws BoundsError Ferrite.AMR.transform_face_remote(adaptive_grid, FaceIndex(8,6), o)
+    # faces
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(1,2), o) == Ferrite.AMR.OctantBWG(0,(8,0,0))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(1,2), o) == Ferrite.AMR.OctantBWG(0,(-8,0,0))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(1,4), o) == Ferrite.AMR.OctantBWG(0,(0,8,0))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(1,4), o) == Ferrite.AMR.OctantBWG(0,(0,-8,0))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(1,6), o) == Ferrite.AMR.OctantBWG(0,(0,0,8))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(1,6), o) == Ferrite.AMR.OctantBWG(0,(0,0,-8))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(8,1), o) == Ferrite.AMR.OctantBWG(0,(-8,0,0))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(8,1), o) == Ferrite.AMR.OctantBWG(0,(8,0,0))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(8,3), o) == Ferrite.AMR.OctantBWG(0,(0,-8,0))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(8,3), o) == Ferrite.AMR.OctantBWG(0,(0,8,0))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(8,5), o) == Ferrite.AMR.OctantBWG(0,(0,0,-8))
+    @test Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(8,5), o) == Ferrite.AMR.OctantBWG(0,(0,0,8))
+
+    @test_throws BoundsError Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(1,1), o)
+    @test_throws BoundsError Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(1,1), o)
+    @test_throws BoundsError Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(1,3), o)
+    @test_throws BoundsError Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(1,3), o)
+    @test_throws BoundsError Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(1,5), o)
+    @test_throws BoundsError Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(1,5), o)
+    @test_throws BoundsError Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(8,2), o)
+    @test_throws BoundsError Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(8,2), o)
+    @test_throws BoundsError Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(8,4), o)
+    @test_throws BoundsError Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(8,4), o)
+    @test_throws BoundsError Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(8,6), o)
+    @test_throws BoundsError Ferrite.AMR.transform_facet_remote(adaptive_grid, FacetIndex(8,6), o)
 
     #corners
     @test_throws BoundsError Ferrite.AMR.transform_corner(adaptive_grid, VertexIndex(1,1), o, false) == Ferrite.AMR.OctantBWG(0,(-8,-8,-8))
@@ -447,8 +447,7 @@ end
     @test Ferrite.AMR.transform_edge(adaptive_grid, EdgeIndex(1,12), o, false) == Ferrite.AMR.OctantBWG(0,(8,8,0))
     @test Ferrite.AMR.transform_edge_remote(adaptive_grid, EdgeIndex(1,12), o, false) == Ferrite.AMR.OctantBWG(0,(-8,-8,0))
 
-    # Rotate three dimensional case 
-    grid = generate_grid(Hexahedron,(2,2,2))
+    # Rotate three dimensional case
     # This is our root mesh top view
     # x-----------x-----------x
     # |6    3    5|8    4    7|
@@ -467,7 +466,8 @@ end
     # |           |           |
     # |5    3    6|5    3    6|
     # x-----------x-----------x
-    # Rotate face topologically
+    grid = generate_grid(Hexahedron,(2,2,2))
+    # Rotate face topologically as decscribed in the ascii picture above
     grid.cells[7] = Hexahedron((grid.cells[7].nodes[2], grid.cells[7].nodes[3], grid.cells[7].nodes[4], grid.cells[7].nodes[1], grid.cells[7].nodes[4+2], grid.cells[7].nodes[4+3], grid.cells[7].nodes[4+4], grid.cells[7].nodes[4+1]))
     grid.cells[7] = Hexahedron((grid.cells[7].nodes[2], grid.cells[7].nodes[3], grid.cells[7].nodes[4], grid.cells[7].nodes[1], grid.cells[7].nodes[4+2], grid.cells[7].nodes[4+3], grid.cells[7].nodes[4+4], grid.cells[7].nodes[4+1]))
     adaptive_grid = ForestBWG(grid,3)
@@ -507,6 +507,113 @@ end
         end
     end
 
+    # Single
+    adaptive_grid = ForestBWG(grid,3)
+    Ferrite.AMR.refine_all!(adaptive_grid,1)
+    Ferrite.AMR.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[8])
+    transfered_grid = Ferrite.creategrid(adaptive_grid)
+    @test unique(transfered_grid.nodes) == transfered_grid.nodes
+    # Unrefined grid has 5 ^ dim nodes and the refined element introduces 6 face center, 12 edge center and 1 volume center nodes
+    @test length(transfered_grid.nodes) == 5^3 + (6 + 12 + 1)
+    # 6 faces and 12 edges of the single refined element induces one hanging node each
+    @test length(transfered_grid.conformity_info) == 6 + 12
+
+    adaptive_grid = ForestBWG(grid,3)
+    Ferrite.AMR.refine_all!(adaptive_grid,1)
+    Ferrite.AMR.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[1])
+    transfered_grid = Ferrite.creategrid(adaptive_grid)
+    @test unique(transfered_grid.nodes) == transfered_grid.nodes
+    # Unrefined grid has 5 ^ dim nodes and the refined element introduces 6 face center, 12 edge center and 1 volume center nodes
+    @test length(transfered_grid.nodes) == 5^3 + (6 + 12 + 1)
+    # 6 faces and 12 edges of the single refined element induces one hanging node each - minus 3 faces and 3 edges on the outer boundary
+    @test length(transfered_grid.conformity_info) == 6 + 12- 2*3
+
+    adaptive_grid = ForestBWG(grid,3)
+    Ferrite.AMR.refine_all!(adaptive_grid,1)
+    Ferrite.AMR.refine!(adaptive_grid.cells[8],adaptive_grid.cells[8].leaves[8])
+    transfered_grid = Ferrite.creategrid(adaptive_grid)
+    @test unique(transfered_grid.nodes) == transfered_grid.nodes
+     # Unrefined grid has 5 ^ dim nodes and the refined element introduces 6 face center, 12 edge center and 1 volume center nodes
+     @test length(transfered_grid.nodes) == 5^3 + (6 + 12 + 1)
+     # 6 faces and 12 edges of the single refined element induces one hanging node each - minus 3 faces and 3 edges on the outer boundary
+    @test length(transfered_grid.conformity_info) == 6 + 12 - 2*3
+
+    adaptive_grid = ForestBWG(grid,3)
+    Ferrite.AMR.refine_all!(adaptive_grid,1)
+    Ferrite.AMR.refine!(adaptive_grid.cells[8],adaptive_grid.cells[8].leaves[1])
+    transfered_grid = Ferrite.creategrid(adaptive_grid)
+    # Unrefined grid has 5 ^ dim nodes and the refined element introduces 6 face center, 12 edge center and 1 volume center nodes
+    @test length(transfered_grid.nodes) == 5^3 + (6 + 12 + 1)
+    # 6 faces and 12 edges of the single refined element induces one hanging node each
+    @test length(transfered_grid.conformity_info) == 6 + 12
+
+    # Combined
+    adaptive_grid = ForestBWG(grid,3)
+    Ferrite.AMR.refine_all!(adaptive_grid,1)
+    Ferrite.AMR.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[8])
+    Ferrite.AMR.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[1])
+    transfered_grid = Ferrite.creategrid(adaptive_grid)
+    @test unique(transfered_grid.nodes) == transfered_grid.nodes
+    @test length(transfered_grid.nodes) == 5^3 + 2*(6 + 12 + 1)
+    @test length(transfered_grid.conformity_info) == 2*(6 + 12) - 2*3
+
+    adaptive_grid = ForestBWG(grid,3)
+    Ferrite.AMR.refine_all!(adaptive_grid,1)
+    Ferrite.AMR.refine!(adaptive_grid.cells[8],adaptive_grid.cells[8].leaves[8])
+    Ferrite.AMR.refine!(adaptive_grid.cells[8],adaptive_grid.cells[8].leaves[1])
+    transfered_grid = Ferrite.creategrid(adaptive_grid)
+    @test unique(transfered_grid.nodes) == transfered_grid.nodes
+    @test length(transfered_grid.nodes) == 5^3 + 2*(6 + 12 + 1)
+    @test length(transfered_grid.conformity_info) == 2*(6 + 12) - 2*3
+
+    # Combined
+    adaptive_grid = ForestBWG(grid,3)
+    Ferrite.AMR.refine_all!(adaptive_grid,1)
+    Ferrite.AMR.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[8])
+    Ferrite.AMR.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[1])
+    Ferrite.AMR.refine!(adaptive_grid.cells[8],adaptive_grid.cells[8].leaves[8])
+    Ferrite.AMR.refine!(adaptive_grid.cells[8],adaptive_grid.cells[8].leaves[1])
+    transfered_grid = Ferrite.creategrid(adaptive_grid)
+    @test unique(transfered_grid.nodes) == transfered_grid.nodes
+    @test length(transfered_grid.nodes) == 5^3 + 4*(6 + 12 + 1)
+    @test length(transfered_grid.conformity_info) == 4*(6 + 12) - 2*3 - 2*3
+
+    # Combined and not rotated
+    adaptive_grid = ForestBWG(grid,3)
+    Ferrite.AMR.refine_all!(adaptive_grid,1)
+    Ferrite.AMR.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[8])
+    Ferrite.AMR.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[1])
+    Ferrite.AMR.refine!(adaptive_grid.cells[6],adaptive_grid.cells[6].leaves[6])
+    Ferrite.AMR.refine!(adaptive_grid.cells[6],adaptive_grid.cells[6].leaves[3])
+    transfered_grid = Ferrite.creategrid(adaptive_grid)
+    @test unique(transfered_grid.nodes) == transfered_grid.nodes
+    # +5^3 on the coarse grid
+    # +4 refined elements a 6 face nodes, 12 edge nodes and 1 volume nodes
+    # -1 shared node between tree 1 and 6
+    @test length(transfered_grid.nodes) == 5^3 + 4*(6 + 12 + 1) - 1
+    # 4*(6 + 12)    potential hanging nodes
+    # - 2           shared through common edge
+    # - 2* (2*3)    outer boundary face and edge nodes
+    @test length(transfered_grid.conformity_info) == 4*(6 + 12) - 2 - 2*3 - 2*3
+
+    # Combined and rotated
+    adaptive_grid = ForestBWG(grid,3)
+    Ferrite.AMR.refine_all!(adaptive_grid,1)
+    Ferrite.AMR.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[8])
+    Ferrite.AMR.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[1])
+    Ferrite.AMR.refine!(adaptive_grid.cells[7],adaptive_grid.cells[7].leaves[6])
+    Ferrite.AMR.refine!(adaptive_grid.cells[7],adaptive_grid.cells[7].leaves[3])
+    transfered_grid = Ferrite.creategrid(adaptive_grid)
+    @test unique(transfered_grid.nodes) == transfered_grid.nodes
+    # +5^3 on the coarse grid
+    # +4 refined elements a 6 face nodes, 12 edge nodes and 1 volume nodes
+    # -1 shared node between tree 1 and 7
+    @test length(transfered_grid.nodes) == 5^3 + 4*(6 + 12 + 1) - 1
+    # 4*(6 + 12)    potential hanging nodes
+    # - 2           shared through common edge
+    # - 2* (2*3)    outer boundary face and edge nodes
+    @test length(transfered_grid.conformity_info) == 4*(6 + 12) - 2 - 2*3 - 2*3
+
     # Reproducer test for Fig.3 BWG 11
     grid = generate_grid(Hexahedron,(2,1,1))
     # (a)
@@ -514,7 +621,7 @@ end
     Ferrite.AMR.refine!(adaptive_grid.cells[2],adaptive_grid.cells[2].leaves[1])
     Ferrite.AMR.refine!(adaptive_grid.cells[2],adaptive_grid.cells[2].leaves[3])
     @test adaptive_grid.cells[2].leaves[3+4] == Ferrite.AMR.OctantBWG(2,(0,4,2))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(1,2), adaptive_grid.cells[2].leaves[3+4]) == Ferrite.AMR.OctantBWG(2,(8,4,2))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(1,2), adaptive_grid.cells[2].leaves[3+4]) == Ferrite.AMR.OctantBWG(2,(8,4,2))
     # (b) Rotate elements topologically
     grid.cells[1] = Hexahedron((grid.cells[1].nodes[2], grid.cells[1].nodes[3], grid.cells[1].nodes[4], grid.cells[1].nodes[1], grid.cells[1].nodes[6], grid.cells[1].nodes[7], grid.cells[1].nodes[8], grid.cells[1].nodes[5]))
     grid.cells[2] = Hexahedron((grid.cells[2].nodes[4], grid.cells[2].nodes[1], grid.cells[2].nodes[2], grid.cells[2].nodes[3], grid.cells[2].nodes[8], grid.cells[2].nodes[5], grid.cells[2].nodes[6], grid.cells[2].nodes[7]))
@@ -523,7 +630,7 @@ end
     Ferrite.AMR.refine!(adaptive_grid.cells[2],adaptive_grid.cells[2].leaves[1])
     Ferrite.AMR.refine!(adaptive_grid.cells[2],adaptive_grid.cells[2].leaves[1])
     @test adaptive_grid.cells[2].leaves[6] == Ferrite.AMR.OctantBWG(2,(2,0,2))
-    @test Ferrite.AMR.transform_face(adaptive_grid, FaceIndex(1,3), adaptive_grid.cells[2].leaves[6]) == Ferrite.AMR.OctantBWG(2,(4,-2,2))
+    @test Ferrite.AMR.transform_facet(adaptive_grid, FacetIndex(1,3), adaptive_grid.cells[2].leaves[6]) == Ferrite.AMR.OctantBWG(2,(4,-2,2))
 end
 
 @testset "ForestBWG AbstractGrid Interfacing" begin
@@ -631,7 +738,7 @@ end
     Ferrite.AMR.balanceforest!(adaptive_grid)
     transfered_grid_ref = Ferrite.AMR.creategrid(adaptive_grid)
 
-    # Rotate three dimensional case 
+    # Rotate three dimensional case
     grid = generate_grid(Hexahedron,(2,2,2))
     # This is our root mesh top view
     # x-----------x-----------x
@@ -665,7 +772,7 @@ end
     transfered_grid = Ferrite.AMR.creategrid(adaptive_grid)
     @test length(transfered_grid.cells) == length(transfered_grid_ref.cells)
     @test length(transfered_grid.cells) == 92
-    
+
     # edge balancing for new introduced connection that is not within topology table
     grid = generate_grid(Hexahedron, (2,1,1));
     adaptive_grid  = ForestBWG(grid,3)
@@ -743,7 +850,7 @@ end
     #################################################
     ############ structured 2D examples #############
     #################################################
-    
+
     # 2D case with a single tree
     grid = generate_grid(Quadrilateral,(1,1))
     adaptive_grid = ForestBWG(grid,3)
@@ -780,7 +887,7 @@ end
     Ferrite.AMR.refine!(adaptive_grid.cells[7],adaptive_grid.cells[7].leaves[5])
     Ferrite.AMR.refine!(adaptive_grid.cells[9],adaptive_grid.cells[9].leaves[end])
     Ferrite.AMR.refine!(adaptive_grid.cells[9],adaptive_grid.cells[9].leaves[end])
-    Ferrite.AMR.refine!(adaptive_grid.cells[9],adaptive_grid.cells[9].leaves[end]) 
+    Ferrite.AMR.refine!(adaptive_grid.cells[9],adaptive_grid.cells[9].leaves[end])
     transfered_grid = Ferrite.AMR.creategrid(adaptive_grid)
     @test length(transfered_grid.cells) == 45
     @test length(transfered_grid.nodes) == 76
@@ -809,7 +916,7 @@ end
     @test length(transfered_grid.cells) == 16
     @test length(transfered_grid.nodes) == 45
     @test unique(transfered_grid.nodes) == transfered_grid.nodes
-    #rotate the case around 
+    #rotate the case around
     grid = generate_grid(Hexahedron,(1,2,1))
     adaptive_grid = ForestBWG(grid,3)
     Ferrite.AMR.refine_all!(adaptive_grid,1)
@@ -833,7 +940,7 @@ end
     @test length(transfered_grid.nodes) == 125 # 5 per edge
     @test unique(transfered_grid.nodes) == transfered_grid.nodes
 
-    # Rotate three dimensional case 
+    # Rotate three dimensional case
     grid = generate_grid(Hexahedron,(2,2,2))
     # Rotate face topologically
     grid.cells[2] = Hexahedron((grid.cells[2].nodes[2], grid.cells[2].nodes[3], grid.cells[2].nodes[4], grid.cells[2].nodes[1], grid.cells[2].nodes[4+2], grid.cells[2].nodes[4+3], grid.cells[2].nodes[4+4], grid.cells[2].nodes[4+1]))
@@ -890,7 +997,7 @@ end
     # x-----x-----x-----------x
     transfered_grid = Ferrite.AMR.creategrid(adaptive_grid)
     @test length(transfered_grid.conformity_info) == 12
-    
+
     # Easy Interoctree
     grid = generate_grid(Hexahedron,(2,2,2))
     adaptive_grid = ForestBWG(grid,3)
@@ -964,4 +1071,25 @@ end
     transfered_grid_rotated = Ferrite.AMR.creategrid(adaptive_grid)
     @test transfered_grid_rotated.conformity_info[11] == [1,7]
     @test transfered_grid_rotated.conformity_info[10] == [3,7]
+
+    # multiple corner connections in 2D by disc discretization
+    grid = Ferrite.generate_simple_disc_grid(Quadrilateral,10)
+    adaptive_grid = ForestBWG(grid,3)
+    @test getncells(adaptive_grid) == 10
+    Ferrite.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[1])
+    Ferrite.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[3])
+    @test getncells(adaptive_grid) == 16
+    Ferrite.balanceforest!(adaptive_grid)
+    @test getncells(adaptive_grid) == 9*4 + 3 + 4
+
+    # multiple corner connections in 3D by cylinder discretization
+    grid = Ferrite.generate_simple_disc_grid(Hexahedron,10)
+    adaptive_grid = ForestBWG(grid,3)
+    @test getncells(adaptive_grid) == 10
+    Ferrite.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[1])
+    @test getncells(adaptive_grid) == 17
+    Ferrite.refine!(adaptive_grid.cells[1],adaptive_grid.cells[1].leaves[3])
+    @test getncells(adaptive_grid) == 24
+    Ferrite.balanceforest!(adaptive_grid)
+    @test getncells(adaptive_grid) == 9*8 + 7 + 8
 end

@@ -1,16 +1,28 @@
 using Ferrite, FerriteGmsh, SparseArrays
-#grid = togrid("l.msh");
-grid = generate_grid(Quadrilateral,(2,2))
-grid  = ForestBWG(grid,25)
-Ferrite.refine_all!(grid,1)
-Ferrite.refine_all!(grid,2)
+#cells = [Hexahedron((1, 2, 5, 4, 10, 11, 14, 13)),Hexahedron((4, 5, 8, 7, 13, 14, 17, 16)), Hexahedron((3, 4, 7, 6, 12, 13, 16, 15)), Hexahedron((12, 13, 16, 15, 21, 22, 25, 24)), Hexahedron((13, 14, 17, 16, 22, 23, 26, 25)), Hexahedron((10, 11, 14, 13, 19, 20, 23, 22)), Hexahedron((9, 10, 13, 12, 18, 19, 22, 21))]
+### beefy L cells = [Hexahedron((4, 5, 8, 7, 13, 14, 17, 16)), Hexahedron((3, 4, 7, 6, 12, 13, 16, 15)), Hexahedron((12, 13, 16, 15, 21, 22, 25, 24)), Hexahedron((13, 14, 17, 16, 22, 23, 26, 25)), Hexahedron((10, 11, 14, 13, 19, 20, 23, 22)), Hexahedron((9, 10, 13, 12, 18, 19, 22, 21))]
+### cells = [Hexahedron((3, 4, 7, 6, 12, 13, 16, 15)), Hexahedron((12, 13, 16, 15, 21, 22, 25, 24)), Hexahedron((9, 10, 13, 12, 18, 19, 22, 21))]
+#nodes = Node{3, Float64}[Node{3, Float64}(Vec{3}((0.0, -1.0, -1.0))), Node{3, Float64}(Vec{3}((1.0, -1.0, -1.0))), Node{3, Float64}(Vec{3}((-1.0, 0.0, -1.0))), Node{3, Float64}(Vec{3}((0.0, 0.0, -1.0))), Node{3, Float64}(Vec{3}((1.0, 0.0, -1.0))), Node{3, Float64}(Vec{3}((-1.0, 1.0, -1.0))), Node{3, Float64}(Vec{3}((0.0, 1.0, -1.0))), Node{3, Float64}(Vec{3}((1.0, 1.0, -1.0))), Node{3, Float64}(Vec{3}((-1.0, -1.0, 0.0))), Node{3, Float64}(Vec{3}((0.0, -1.0, 0.0))), Node{3, Float64}(Vec{3}((1.0, -1.0, 0.0))), Node{3, Float64}(Vec{3}((-1.0, 0.0, 0.0))), Node{3, Float64}(Vec{3}((0.0, 0.0, 0.0))), Node{3, Float64}(Vec{3}((1.0, 0.0, 0.0))), Node{3, Float64}(Vec{3}((-1.0, 1.0, 0.0))), Node{3, Float64}(Vec{3}((0.0, 1.0, 0.0))), Node{3, Float64}(Vec{3}((1.0, 1.0, 0.0))), Node{3, Float64}(Vec{3}((-1.0, -1.0, 1.0))), Node{3, Float64}(Vec{3}((0.0, -1.0, 1.0))), Node{3, Float64}(Vec{3}((1.0, -1.0, 1.0))), Node{3, Float64}(Vec{3}((-1.0, 0.0, 1.0))), Node{3, Float64}(Vec{3}((0.0, 0.0, 1.0))), Node{3, Float64}(Vec{3}((1.0, 0.0, 1.0))), Node{3, Float64}(Vec{3}((-1.0, 1.0, 1.0))), Node{3, Float64}(Vec{3}((0.0, 1.0, 1.0))), Node{3, Float64}(Vec{3}((1.0, 1.0, 1.0)))]
+#grid = Grid(cells,nodes)
+#addfacetset!(grid,"front",x->x[2]≈-1)
+#addfacetset!(grid,"back",x->x[2]≈1)
+#addfacetset!(grid,"left",x->x[3]≈-1)
+#addfacetset!(grid,"right",x->x[3]≈1)
+#addfacetset!(grid,"top",x->x[1]≈-1)
+#addfacetset!(grid,"bottom",x->x[1]≈1)
+#addfacetset!(grid,"pull",x->x[1]≈0 && x[2] <= 0.5 && x[3] <= 0.5)
+grid = generate_grid(Hexahedron,(2,1,1))
+grid  = ForestBWG(grid,20)
+#Ferrite.refine_all!(grid,1)
+Ferrite.refine!(grid,[1,2])
+Ferrite.balanceforest!(grid)
 
 struct Elasticity
     G::Float64
     K::Float64
 end
 
-function material_routine(material::Elasticity, ε::SymmetricTensor{2})
+function material_routine(material::Elasticity, ε::SymmetricTensor{dim}) where dim
     (; G, K) = material
     stress(ε) = 2G * dev(ε) + K * tr(ε) * one(ε)
     ∂σ∂ε, σ = gradient(stress, ε, :all)
@@ -63,10 +75,10 @@ function assemble_global!(K, f, a, dh, cellvalues, material)
 end
 
 function solve(grid)
-    dim = 2
-    order = 1 
-    ip = Lagrange{RefQuadrilateral, order}()^dim 
-    qr = QuadratureRule{RefQuadrilateral}(2) 
+    dim = 3
+    order = 1
+    ip = Lagrange{RefHexahedron, order}()^dim
+    qr = QuadratureRule{RefHexahedron}(2)
     cellvalues = CellValues(qr, ip);
 
     dh = DofHandler(grid)
@@ -75,8 +87,12 @@ function solve(grid)
 
     ch = ConstraintHandler(dh)
     add!(ch, Ferrite.ConformityConstraint(:u))
-    add!(ch, Dirichlet(:u, getfaceset(grid, "top"), (x, t) -> Vec{2}((0.0,0.0)), [1,2]))
-    add!(ch, Dirichlet(:u, getfaceset(grid, "right"), (x, t) -> 0.01, 2))
+    add!(ch, Dirichlet(:u, getfacetset(grid, "bottom"), (x, t) -> Vec{3}((0.0,0.0,0.0)), [1,2,3]))
+    add!(ch, Dirichlet(:u, getfacetset(grid, "back"), (x, t) -> Vec{3}((0.0,0.0,0.0)), [1,2,3]))
+    add!(ch, Dirichlet(:u, getfacetset(grid, "front"), (x, t) -> Vec{3}((0.0,0.0,0.0)), [1,2,3]))
+    add!(ch, Dirichlet(:u, getfacetset(grid, "top"), (x, t) -> Vec{3}((0.0,0.0,0.0)), [1,2,3]))
+    add!(ch, Dirichlet(:u, getfacetset(grid, "right"), (x, t) -> Vec{3}((0.0,0.0,0.0)), [1,2,3]))
+    add!(ch, Dirichlet(:u, getfacetset(grid, "left"), (x, t) -> Vec{3}((-0.1,0.0,0.0)), [1,2,3]))
     close!(ch);
 
     K = create_sparsity_pattern(dh,ch)
@@ -89,19 +105,18 @@ function solve(grid)
     return u,dh,ch,cellvalues
 end
 
-function compute_fluxes(u,dh)
-    ip = Lagrange{RefQuadrilateral, 1}()^2
-    ## Superconvergent points
-    qr = QuadratureRule{RefQuadrilateral}(1)
+function compute_fluxes(u,dh::DofHandler{dim}) where dim
+    ip = Lagrange{RefHexahedron, 1}()^dim
+    qr = QuadratureRule{RefHexahedron}(2)
     cellvalues_sc = CellValues(qr, ip);
     ## "Normal" quadrature points for the fluxes
-    qr = QuadratureRule{RefQuadrilateral}(2)
+    qr = QuadratureRule{RefHexahedron}(2)
     cellvalues = CellValues(qr, ip);
     ## Buffers
-    σ_gp_sc = Vector{Vector{SymmetricTensor{2,2,Float64,3}}}()
-    σ_gp_sc_loc = Vector{SymmetricTensor{2,2,Float64,3}}()
-    σ_gp = Vector{Vector{SymmetricTensor{2,2,Float64,3}}}()
-    σ_gp_loc = Vector{SymmetricTensor{2,2,Float64,3}}()
+    σ_gp_sc = Vector{Vector{SymmetricTensor{2,dim,Float64,dim*2}}}()
+    σ_gp_sc_loc = Vector{SymmetricTensor{2,dim,Float64,dim*2}}()
+    σ_gp = Vector{Vector{SymmetricTensor{2,dim,Float64,dim*2}}}()
+    σ_gp_loc = Vector{SymmetricTensor{2,dim,Float64,dim*2}}()
     for (cellid,cell) in enumerate(CellIterator(dh))
         reinit!(cellvalues, cell)
         reinit!(cellvalues_sc, cell)
@@ -126,18 +141,20 @@ function compute_fluxes(u,dh)
 end
 
 function solve_adaptive(initial_grid)
-    ip = Lagrange{RefQuadrilateral, 1}()
-    qr = QuadratureRule{RefQuadrilateral}(1)
+    ip = Lagrange{RefHexahedron, 1}()
+    qr = QuadratureRule{RefHexahedron}(2)
     cellvalues_tensorial = CellValues(qr, ip);
     finished = false
     i = 1
     grid = initial_grid
+    transfered_grid = Ferrite.creategrid(grid)
+    pvd = VTKFileCollection("linear-elasticity.pvd",transfered_grid)
     while !finished
         transfered_grid = Ferrite.creategrid(grid)
         u,dh,ch,cv = solve(transfered_grid)
         σ_gp, σ_gp_sc = compute_fluxes(u,dh)
-        projector = L2Projector(Lagrange{RefQuadrilateral, 1}()^2, transfered_grid)
-        σ_dof = project(projector, σ_gp, QuadratureRule{RefQuadrilateral}(2))
+        projector = L2Projector(Lagrange{RefHexahedron, 1}()^3, transfered_grid)
+        σ_dof = project(projector, σ_gp, QuadratureRule{RefHexahedron}(2))
         cells_to_refine = Int[]
         error_arr = Float64[]
         for (cellid,cell) in enumerate(CellIterator(projector.dh))
@@ -146,33 +163,34 @@ function solve_adaptive(initial_grid)
             error = 0.0
             for q_point in 1:getnquadpoints(cellvalues_tensorial)
                 σ_dof_at_sc = function_value(cellvalues_tensorial, q_point, σe)
-                error += norm((σ_gp_sc[cellid][1] - σ_dof_at_sc )) * getdetJdV(cellvalues_tensorial,q_point)
-            end
-            if error > 0.01
-                push!(cells_to_refine,cellid)
+                error += norm((σ_gp_sc[cellid][q_point] - σ_dof_at_sc )) * getdetJdV(cellvalues_tensorial,q_point)
             end
             push!(error_arr,error)
         end
-        vtk_grid("linear_elasticity-$i", dh) do vtk
-            vtk_point_data(vtk, dh, u)
-            vtk_point_data(vtk, projector, σ_dof, "stress")
-            vtk_cell_data(vtk, getindex.(collect(Iterators.flatten(σ_gp_sc)),1), "stress sc")
-            vtk_cell_data(vtk, error_arr, "error")
+        η = maximum(error_arr)
+        θ = 0.5
+        for (cellid,cell_err) in enumerate(error_arr)
+            if cell_err > θ*η
+                push!(cells_to_refine,cellid)
+            end
+        end
+        addstep!(pvd,i,transfered_grid) do vtk
+            write_solution(vtk, dh, u)
+            write_projection(vtk, projector, σ_dof, "stress")
+            write_cell_data(vtk, getindex.(collect(Iterators.flatten(σ_gp_sc)),1), "stress sc")
+            write_cell_data(vtk, error_arr, "error")
         end
 
         Ferrite.refine!(grid,cells_to_refine)
-        vtk_grid("unbalanced.vtu", dh) do vtk
-        end
-
         Ferrite.balanceforest!(grid)
-        vtk_grid("balanced.vtu", dh) do vtk
-        end
 
         i += 1
-        if isempty(cells_to_refine)
+        if isempty(cells_to_refine) || maximum(error_arr) < 0.05
             finished = true
         end
+        break
     end
+    close(pvd)
 end
 
 solve_adaptive(grid)
